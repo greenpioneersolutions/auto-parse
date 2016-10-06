@@ -96,7 +96,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 Created by ![Green Pioneer](http://greenpioneersolutions.com/img/icons/apple-icon-180x180.png)
 
-#### This is [on GitHub](https://github.com/greenpioneersolutions/buildreq)
+#### This is [on GitHub](https://github.com/greenpioneersolutions/auto-parse)
 #### Find us [on GitHub](https://github.com/greenpioneersolutions)
 #### Find us [on Twitter](https://twitter.com/greenpioneerdev)
 #### Find us [on Facebook](https://www.facebook.com/Green-Pioneer-Solutions-1023752974341910)
