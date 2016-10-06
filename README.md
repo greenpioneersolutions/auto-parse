@@ -1,8 +1,4 @@
-# auto-parse
-
-
-
-
+# Auto Parse
 
 [![npm][npm-image]][npm-url]
 [![downloads][downloads-image]][downloads-url]
@@ -32,7 +28,7 @@ How to use Auto Parse
 ``` javascript
 // Lodash Mixin
 var autoParse = require('auto-parse')
- _.mixin({'autoParse:autoParse'})
+ _.mixin({'autoParse':autoParse})
 // Require, Delcare & Call
 var autoParse = require('auto-parse')
 console.log(autoParse('Green Pioneer')) // Prints out as a String
