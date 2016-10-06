@@ -1,0 +1,62 @@
+{
+  "name": "auto-parse",
+  "version": "1.0.0",
+  "description": "auto-parse any value you happen to send in",
+  "main": "index.js",
+  "dependencies": {
+    "lodash": "^4.16.3"
+  },
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "mocha": "^3.1.0",
+    "standard": "^8.3.0"
+  },
+  "scripts": {
+    "test": "npm run mocha && npm run standard",
+    "mocha": "node node_modules/mocha/bin/mocha test/mocha.test.js  ",
+    "standard": "node node_modules/standard/bin/cmd.js || standard"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://greenpioneer@github.com/greenpioneersolutions/auto-parse.git"
+  },
+  "keywords": [
+    "greenpioneersolutions"
+  ],
+  "contributors": [
+    {
+      "name": "greenpioneersolutions",
+      "email": "green@greenpioneersolutions.com",
+      "web": "https://github.com/greenpioneersolutions"
+    }
+  ],
+  "maintainers": [
+    {
+      "name": "greenpioneersolutions",
+      "web": "https://github.com/greenpioneersolutions?tab=members"
+    }
+  ],
+  "author": "Green Pioneer <green@greenpioneersolutions.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/greenpioneersolutions/auto-parse/issues"
+  },
+  "homepage": "https://github.com/greenpioneersolutions/auto-parse#readme",
+  "standard": {
+    "globals": [
+      "angular",
+      "toastr",
+      "moment",
+      "self",
+      "_",
+      "describe",
+      "it",
+      "__dirname",
+      "localStorage",
+      "io",
+      "expect",
+      "inject",
+      "before"
+    ]
+  }
+}
