@@ -217,4 +217,28 @@ describe('Auto Parse', function () {
       done()
     })
   })
+  describe('parse as json', function () {
+    it('{}', function (done) {
+      assert.deepEqual(autoParse('{}'), {})
+      done()
+    })
+    it('[]', function (done) {
+      assert.deepEqual(autoParse('[]'), [])
+      done()
+    })
+    it('["42"]', function (done) {
+      assert.deepEqual(autoParse('["42"]'), [42])
+      done()
+    })
+  })
+  describe('handle NaNs', function () {
+    it('NaN', function (done) {
+      assert.deepEqual(autoParse(NaN), NaN)
+      done()
+    })
+    it('NaN', function (done) {
+      assert.deepEqual(autoParse('NaN'), NaN)
+      done()
+    })
+  })
 })

@@ -58,7 +58,21 @@ function parse (value) {
   if (typeof value === 'object') {
     return parseObject(value)
   }
+
   // STRING SECTION - If we made it this far that means it is a string that we must do something with to parse
+  if (value === 'NaN') {
+    return NaN
+  }
+
+  var jsonParsed = null
+  try {
+    jsonParsed = JSON.parse(value)
+  } catch (e) {}
+
+  if (jsonParsed && typeof jsonParsed === 'object') {
+    return parse(jsonParsed)
+  }
+
   value = stripTrimLower(value)
   var num = _.toNumber(value)
   var boo = toBoolean(value)
