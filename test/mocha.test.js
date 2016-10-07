@@ -125,25 +125,40 @@ describe('Auto Parse', function () {
     })
   })
   describe('Object', function () {
-    it('{name: "jason",age: "50",admin: "true",grade:["80", "90", "100"]}', function (done) {
-      var data = {
-        name: 'jason',
-        age: '50',
-        admin: 'true',
-        grade: ['80', '90', '100']
-      }
-      assert.equal(autoParse(data)['name'], 'jason')
-      assert.typeOf(autoParse(data)['name'], 'string')
-      assert.equal(autoParse(data)['age'], 50)
-      assert.typeOf(autoParse(data)['age'], 'number')
-      assert.equal(autoParse(data)['admin'], true)
-      assert.typeOf(autoParse(data)['admin'], 'boolean')
-      assert.equal(autoParse(data)['grade'][0], 80)
-      assert.typeOf(autoParse(data)['grade'][0], 'number')
-      assert.equal(autoParse(data)['grade'][1], 90)
-      assert.typeOf(autoParse(data)['grade'][1], 'number')
-      assert.equal(autoParse(data)['grade'][2], 100)
-      assert.typeOf(autoParse(data)['grade'][2], 'number')
+    var data = {
+      name: 'jason',
+      age: '50',
+      admin: 'true',
+      parents: [
+        {
+          name: 'Alice',
+          age: '75',
+          dead: 'false'
+        },
+        {
+          name: 'Bob',
+          age: '80',
+          dead: 'true'
+        }
+      ],
+      grade: ['80', '90', '100']
+    }
+    it(JSON.stringify(data), function (done) {
+      assert.equal(autoParse(data).name, 'jason')
+      assert.typeOf(autoParse(data).name, 'string')
+      assert.equal(autoParse(data).age, 50)
+      assert.typeOf(autoParse(data).age, 'number')
+      assert.equal(autoParse(data).admin, true)
+      assert.typeOf(autoParse(data).admin, 'boolean')
+      assert.equal(autoParse(data).grade[0], 80)
+      assert.typeOf(autoParse(data).grade[0], 'number')
+      assert.equal(autoParse(data).grade[1], 90)
+      assert.typeOf(autoParse(data).grade[1], 'number')
+      assert.equal(autoParse(data).grade[2], 100)
+      assert.typeOf(autoParse(data).grade[2], 'number')
+      assert.typeOf(autoParse(data).grade[2], 'number')
+      assert.equal(autoParse(data).parents[0].name, 'Alice')
+      assert.equal(autoParse(data).parents[0].age, 75)
       done()
     })
   })
