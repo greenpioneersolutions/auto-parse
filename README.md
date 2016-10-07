@@ -13,19 +13,21 @@
 [downloads-image]: https://img.shields.io/npm/dm/auto-parse.svg?style=flat
 [downloads-url]: https://npmjs.org/package/auto-parse
 
-Installation
---------------------
-```bash 
+## Installation
+```sh
 npm install auto-parse --save
 ```
 
-Why Auto Parse
---------------------
-Auto parse was built to solve the simple use cause of auto parsing data. I know there are lots of ways to parse out there and the reason you would use this one over any other one is if you cant control what users are sending you. Sometimes you need to know what they ment even if they capitalize, put in extra spaces or everything came as a string in a object. 
+## Why Auto Parse
+Auto parse was built to solve the simple use cause of auto parsing data. I
+know there are lots of ways to parse out there and the reason you would use
+this one over any other one is if you cant control what users are sending you.
+Sometimes you need to know what they ment even if they capitalize, put in extra
+spaces or everything came as a string in a object.
 
-How to use Auto Parse
---------------------
-``` javascript
+## How to use Auto Parse
+
+```js
 // Lodash Mixin
 var autoParse = require('auto-parse')
  _.mixin({'autoParse':autoParse})
@@ -33,16 +35,18 @@ var autoParse = require('auto-parse')
 var autoParse = require('auto-parse')
 console.log(autoParse('Green Pioneer')) // Prints out as a String
 ```
+
 Check the Usage examples out below
 
-What is Auto Parse
---------------------
-auto-parse any value you happen to send in (String Number Boolean Array Object function undefined & null). You send it we will try to find a way to parse it.
+## What is Auto Parse
 
-Usage
---------------------
+`auto-parse` any value you happen to send in (`String`, `Number`, `Boolean`,
+`Array`, `Object`, `Function`, `undefined` and `null`). You send it we will
+try to find a way to parse it.
 
-``` javascript
+## Usage
+
+```js
 var autoParse = require('auto-parse')
 
 autoParse('Green Pioneer') // Prints out as a String
@@ -65,8 +69,8 @@ autoParse(' Null ')// Prints out as a null
 [Check out JS Fiddle Example](https://jsfiddle.net/greenpioneer/4y744xyd/)
 
 
-License
----------------------------------
+## License
+
 The MIT License (MIT)
 
 Copyright (c) 2014-2017 Green Pioneer
