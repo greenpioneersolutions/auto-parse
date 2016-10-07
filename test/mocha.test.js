@@ -102,7 +102,7 @@ describe('Auto Parse', function () {
       assert.typeOf(autoParse('True'), 'boolean')
       done()
     })
-    it('TrUe Stringt o Boolean', function (done) {
+    it('TrUe String o Boolean', function (done) {
       assert.equal(autoParse('TrUe'), true)
       assert.typeOf(autoParse('TrUe'), 'boolean')
       done()
