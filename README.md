@@ -33,7 +33,7 @@ var autoParse = require('auto-parse')
  _.mixin({'autoParse':autoParse})
 // Require, Delcare & Call
 var autoParse = require('auto-parse')
-console.log(autoParse('Green Pioneer')) // Prints out as a String
+console.log(autoParse('Green Pioneer')) // Parses as a String
 ```
 
 Check the Usage examples out below
@@ -49,21 +49,24 @@ try to find a way to parse it.
 ```js
 var autoParse = require('auto-parse')
 
-autoParse('Green Pioneer') // Prints out as a String
-autoParse('26')// Prints out as a Number
-autoParse('TrUe ')// Prints out as a Boolean
-autoParse(['80', '92', '23', 'TruE', false]) // Prints out as a Array
+autoParse('Green Pioneer') // Parses as a String
+autoParse('26')// Parses as a Number
+autoParse('TrUe ')// Parses as a Boolean
+autoParse(['80', '92', '23', 'TruE', false]) // Parses as a Array
 autoParse({
-  name: 'jason', // Prints out as a String
-  age: '50',// Prints out as a Number
-  admin: 'true',// Prints out as a Boolean
-  grade: ['80', '90', '100']// Prints out as a Array full of Numbers
-}) // Prints out as a Object
+  name: 'jason', // Parses as a String
+  age: '50',// Parses as a Number
+  admin: 'true',// Parses as a Boolean
+  grade: ['80', '90', '100']// Parses as a Array full of Numbers
+}) // Parses as a Object
 autoParse(function () {
   return '9'
-})// Prints out as a Number
-autoParse(' Undefined ')// Prints out as a undefined
-autoParse(' Null ')// Prints out as a null
+})// Parses as a Number
+autoParse(' Undefined ')// Parses as a undefined
+autoParse(' Null ')// Parses as a null
+autoParse('{}') // Parses as a json
+autoParse('["42"]') // Parses as a json
+autoParse('NaN') // Parses as a NaN
 ```
 
 [Check out JS Fiddle Example](https://jsfiddle.net/greenpioneer/4y744xyd/)
