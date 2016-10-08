@@ -1,7 +1,7 @@
 {
   "name": "auto-parse",
-  "version": "1.0.0",
-  "description": "auto-parse any value you happen to send in",
+  "version": "1.1.0",
+  "description": "auto-parse any value you happen to send in (String, Number, Boolean,Array, Object, Function, undefined and null). You send it we will try to find a way to parse it.",
   "main": "index.js",
   "dependencies": {
     "lodash": "^4.16.3"
@@ -28,6 +28,10 @@
       "name": "greenpioneersolutions",
       "email": "green@greenpioneersolutions.com",
       "web": "https://github.com/greenpioneersolutions"
+    },{
+      "name": "Ionică Bizău",
+      "email": "bizauionica@gmail.com",
+      "web": "http://ionicabizau.net"
     }
   ],
   "maintainers": [
