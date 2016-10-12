@@ -45,6 +45,26 @@ describe('Auto Parse', function () {
     })
   })
   describe('Number', function () {
+    it('hexadecimals String to Number', function (done) {
+      assert.equal(autoParse('0xFF'), 255)
+      done()
+    })
+    it('dots String to Number', function (done) {
+      assert.equal(autoParse('.42'), 0.42)
+      done()
+    })
+    it('octals String to Number', function (done) {
+      assert.equal(autoParse('0o123'), 83)
+      done()
+    })
+    it('binary number String to Number', function (done) {
+      assert.equal(autoParse('0b1101'), 13)
+      done()
+    })
+    it('Exponent String to Number', function (done) {
+      assert.equal(autoParse('7e3'), 7000)
+      done()
+    })
     it('26 String to Number', function (done) {
       assert.equal(autoParse('26'), 26)
       assert.typeOf(autoParse('26'), 'number')
@@ -238,6 +258,127 @@ describe('Auto Parse', function () {
     })
     it('NaN', function (done) {
       assert.deepEqual(autoParse('NaN'), NaN)
+      done()
+    })
+  })
+  describe('MISC', function () {
+    it('0XFFFFFF', function (done) {
+      done()
+    })
+    it('#0000000', function (done) {
+      done()
+    })
+    it('#AAA', function (done) {
+      done()
+    })
+  })
+  describe('Convert Type', function () {
+    it('* to String', function (done) {
+      var data = function () {
+        return '9'
+      }
+      assert.equal(autoParse('1234', 'String'), '1234')
+      assert.equal(autoParse(1234, 'String'), '1234')
+      assert.equal(autoParse('true', 'String'), 'true')
+      assert.equal(autoParse(true, 'String'), 'true')
+      assert.equal(autoParse([], 'String'), '[]')
+      assert.equal(autoParse({}, 'String'), '{}')
+      assert.equal(autoParse(data, 'String'), "function () {\n        return '9'\n      }")
+      done()
+    })
+    it('function to function', function (done) {
+      var data = function () {
+        return '9'
+      }
+      assert.equal(autoParse(data, 'function'), 9)
+      done()
+    })
+    it('* to object', function (done) {
+      var data = {
+        name: 'jason',
+        age: '50',
+        admin: 'true',
+        parents: [
+          {
+            name: 'Alice',
+            age: '75',
+            dead: 'false'
+          },
+          {
+            name: 'Bob',
+            age: '80',
+            dead: 'true'
+          }
+        ],
+        grade: ['80', '90', '100']
+      }
+      it(JSON.stringify(data), function (done) {
+        assert.equal(autoParse(data, 'object').name, 'jason')
+        assert.typeOf(autoParse(data, 'object').name, 'string')
+        assert.equal(autoParse(data, 'object').age, 50)
+        assert.typeOf(autoParse(data, 'object').age, 'number')
+        assert.equal(autoParse(data, 'object').admin, true)
+        assert.typeOf(autoParse(data, 'object').admin, 'boolean')
+        assert.equal(autoParse(data, 'object').grade[0], 80)
+        assert.typeOf(autoParse(data, 'object').grade[0], 'number')
+        assert.equal(autoParse(data, 'object').grade[1], 90)
+        assert.typeOf(autoParse(data, 'object').grade[1], 'number')
+        assert.equal(autoParse(data, 'object').grade[2], 100)
+        assert.typeOf(autoParse(data, 'object').grade[2], 'number')
+        assert.typeOf(autoParse(data, 'object').grade[2], 'number')
+        assert.equal(autoParse(data, 'object').parents[0].name, 'Alice')
+        assert.equal(autoParse(data, 'object').parents[0].age, 75)
+        done()
+      })
+      it('{}', function (done) {
+        assert.deepEqual(autoParse('{}', 'object'), {})
+        done()
+      })
+      it('[]', function (done) {
+        assert.deepEqual(autoParse('[]', 'object'), [])
+        done()
+      })
+      it('["42"]', function (done) {
+        assert.deepEqual(autoParse('["42"]', 'object'), [42])
+        done()
+      })
+      done()
+    })
+    it('* to boolean', function (done) {
+      assert.equal(autoParse(1, 'Boolean'), true)
+      assert.equal(autoParse(0, 'Boolean'), false)
+      assert.equal(autoParse('1', 'Boolean'), true)
+      assert.equal(autoParse('0', 'Boolean'), false)
+      assert.equal(autoParse('TrUe', 'Boolean'), true)
+      assert.equal(autoParse('False', 'Boolean'), false)
+      assert.equal(autoParse(true, 'Boolean'), true)
+      assert.equal(autoParse(false, 'Boolean'), false)
+      done()
+    })
+    it('* to number', function (done) {
+      assert.equal(autoParse(1, 'Number'), 1)
+      assert.equal(autoParse(0, 'Number'), 0)
+      assert.equal(autoParse('1', 'Number'), 1)
+      assert.equal(autoParse('0', 'Number'), 0)
+      assert.equal(autoParse('0o123', 'Number'), 83)
+      assert.equal(autoParse('0b10', 'Number'), 2)
+      assert.equal(autoParse('0xFF', 'Number'), 255)
+      assert.equal(autoParse('7e3', 'Number'), 7000)
+      assert.equal(autoParse('.42', 'Number'), 0.42)
+      done()
+    })
+    it('* to undefined', function (done) {
+      assert.equal(autoParse(1, 'Undefined'), undefined)
+      assert.equal(autoParse(0, 'Undefined'), undefined)
+      assert.equal(autoParse('1', 'Undefined'), undefined)
+      assert.equal(autoParse('0', 'Undefined'), undefined)
+      done()
+    })
+    it('* to null', function (done) {
+      assert.equal(autoParse(1, 'Null'), null)
+      assert.equal(autoParse(0, 'Null'), null)
+      assert.equal(autoParse('1', 'Null'), null)
+      assert.equal(autoParse('0', 'Null'), null)
       done()
     })
   })
