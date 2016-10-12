@@ -302,6 +302,7 @@ describe('Auto Parse', function () {
       })
     })
     it('* to boolean', function () {
+      assert.equal(autoParse(1, Boolean), true)
       assert.equal(autoParse(1, 'Boolean'), true)
       assert.equal(autoParse(0, 'Boolean'), false)
       assert.equal(autoParse('1', 'Boolean'), true)
@@ -315,6 +316,8 @@ describe('Auto Parse', function () {
     it('* to number', function () {
       assert.equal(autoParse(1, 'Number'), 1)
       assert.equal(autoParse(0, 'Number'), 0)
+      assert.equal(autoParse(0, Number), 0)
+      assert.equal(autoParse('1', Number), 1)
       assert.equal(autoParse('1', 'Number'), 1)
       assert.equal(autoParse('0', 'Number'), 0)
       assert.equal(autoParse('0o123', 'Number'), 83)

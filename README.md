@@ -10,67 +10,96 @@
 
 [npm-image]: https://img.shields.io/npm/v/auto-parse.svg?style=flat
 [npm-url]: https://npmjs.org/package/auto-parse
-[downloads-image]: https://img.shields.io/npm/dm/auto-parse.svg?style=flat
+[downloads-image]: https://img.shields.io/npm/dt/auto-parse.svg?style=flat
 [downloads-url]: https://npmjs.org/package/auto-parse
+
+## What is Auto Parse
+
+`auto-parse` any value you happen to send in (`String`, `Number`, `Boolean`,
+`Array`, `Object`, `Function`, `undefined` and `null`). You send it we will
+try to find a way to parse it. We now support sending in a string of what type (e.g. "boolean") or constructor (e.g. Boolean)
 
 ## Installation
 ```sh
 npm install auto-parse --save
 ```
 
-## Why Auto Parse
-Auto parse was built to solve the simple use cause of auto parsing data. I
-know there are lots of ways to parse out there and the reason you would use
-this one over any other one is if you cant control what users are sending you.
-Sometimes you need to know what they ment even if they capitalize, put in extra
-spaces or everything came as a string in a object.
+## Documentation
 
-## How to use Auto Parse
+### autoParse(input, type)
 
-```js
-// Lodash Mixin
-var autoParse = require('auto-parse')
- _.mixin({'autoParse':autoParse})
-// Require, Delcare & Call
-var autoParse = require('auto-parse')
-console.log(autoParse('Green Pioneer')) // Parses as a String
-```
+#### Params
+- **Anything** `input`: The input value you want parsed
+- **Constructor|String** `type`: The type. It could be a string (e.g. "array") or a constructor (e.g. Array).
+	
+#### Return
+- **Parsed Value** Could return String, Number, Boolean, Object, Array, Null, NaN, Undefined & Date 
 
-Check the Usage examples out below
 
-## What is Auto Parse
-
-`auto-parse` any value you happen to send in (`String`, `Number`, `Boolean`,
-`Array`, `Object`, `Function`, `undefined` and `null`). You send it we will
-try to find a way to parse it.
-
-## Usage
+#### Usage
 
 ```js
 var autoParse = require('auto-parse')
-
-autoParse('Green Pioneer') // Parses as a String
-autoParse('26')// Parses as a Number
-autoParse('TrUe ')// Parses as a Boolean
-autoParse(['80', '92', '23', 'TruE', false]) // Parses as a Array
+// Strings
+autoParse('Green Pioneer') => 'Green Pioneer'
+// Booleans
+autoParse('TrUe ') => true
+autoParse(false) => false
+// Functions
+autoParse(function () {
+  return '9'
+}) => 9
+// Null &  Undefined
+autoParse(' Undefined ') => undefined
+autoParse(' Null ') => null
+// Objects & Arrays
+autoParse(['80', '92', '23', 'TruE', false]) => [80, 92, 23, true, false]
 autoParse({
   name: 'jason', // Parses as a String
   age: '50',// Parses as a Number
   admin: 'true',// Parses as a Boolean
   grade: ['80', '90', '100']// Parses as a Array full of Numbers
-}) // Parses as a Object
-autoParse(function () {
-  return '9'
-})// Parses as a Number
-autoParse(' Undefined ')// Parses as a undefined
-autoParse(' Null ')// Parses as a null
-autoParse('{}') // Parses as a json
-autoParse('["42"]') // Parses as a json
-autoParse('NaN') // Parses as a NaN
+}) => {name:'jason',age:50,admin:true,grade:[80,90,100]}
+autoParse('{}') => {}
+autoParse('["42"]')  => [42]
+// Numbers
+autoParse('NaN') => NaN
+autoParse('26') => 26
+// hexadecimals
+autoParse('0xFF') => 255
+// dots
+autoParse('.42') => 0.42
+// octals
+autoParse('0o123') =>  83
+// binary number
+autoParse('0b1101') =>  13
+// exponent 
+autoParse('7e3') =>  7000
+
+// Set Type
+autoParse(1, 'Boolean')  =>  true
+autoParse(0, 'Number')  =>   0
+autoParse(1, Boolean)  =>  true
+autoParse(0, Number)  =>   0
+autoParse(1234, String)  =>  '1234'
+// dates
+autoParse('1989-11-30', 'date')  =>  Thu Nov 30 1989 18:00:00 GMT-0600 (CST)
+autoParse('1989-11-30', Date)  =>  Thu Nov 30 1989 18:00:00 GMT-0600 (CST)
+// Passing Functions to type
+function Color (inputColor) {
+  this.color = inputColor
+}
+autoParse('#AAA', Color)  =>  {color: '#AAA'}
 ```
+- [Check out Run Kit Example](https://runkit.com/greenpioneer/auto-parse)
+- [Check out JS Fiddle Example](https://jsfiddle.net/greenpioneer/4y744xyd/)
 
-[Check out JS Fiddle Example](https://jsfiddle.net/greenpioneer/4y744xyd/)
-
+#### Other Uses
+``` js
+// Lodash Mixin
+var autoParse = require('auto-parse')
+ _.mixin({'autoParse':autoParse})
+```
 
 ## License
 
