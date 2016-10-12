@@ -1,10 +1,11 @@
 {
   "name": "auto-parse",
-  "version": "1.1.0",
-  "description": "auto-parse any value you happen to send in (String, Number, Boolean,Array, Object, Function, undefined and null). You send it we will try to find a way to parse it.",
+  "version": "1.2.0",
+  "description": "auto-parse any value you happen to send in (String, Number, Boolean,Array, Object, Function, undefined and null). You send it we will try to find a way to parse it.support sending in a string of what type (e.g. boolean) or constructor (e.g. Boolean)",
   "main": "index.js",
   "dependencies": {
-    "lodash": "^4.16.3"
+    "lodash": "^4.16.3",
+    "typpy": "^2.3.6"
   },
   "devDependencies": {
     "chai": "^3.5.0",
@@ -21,14 +22,50 @@
     "url": "git+https://greenpioneer@github.com/greenpioneersolutions/auto-parse.git"
   },
   "keywords": [
-    "greenpioneersolutions"
+    "greenpioneersolutions",
+    "greenpioneer",
+    "autoParse",
+    "autoParser",
+    "auto-parse",
+    "parse auto",
+    "auto",
+    "parse",
+    "parser",
+    "automatically parse",
+    "parse string",
+    "parse boolean",
+    "parse date",
+    "parse number",
+    "parse function",
+    "parse object",
+    "parse null",
+    "parse color",
+    "parse hexadecimals",
+    "parse dots",
+    "parse octals",
+    "parse binary",
+    "parse exponent",
+    "string parser",
+    "boolean parser",
+    "date parser",
+    "number parser",
+    "function parser",
+    "object parser",
+    "null parser",
+    "color parser",
+    "hexadecimals parser",
+    "dots parser",
+    "octals parser",
+    "binary parser",
+    "exponent parser"
   ],
   "contributors": [
     {
       "name": "greenpioneersolutions",
       "email": "green@greenpioneersolutions.com",
       "web": "https://github.com/greenpioneersolutions"
-    },{
+    },
+    {
       "name": "Ionică Bizău",
       "email": "bizauionica@gmail.com",
       "web": "http://ionicabizau.net"
