@@ -7,9 +7,9 @@ function stripTrimLower (value) {
   return _.replace(_.trim(_.toLower(value)), /[""'']/ig, '')
 }
 
-function isBoolean (value) {
-  return !(checkBoolean(value) === null)
-}
+// function isBoolean (value) {
+//   return !(checkBoolean(value) === null)
+// }
 
 function toBoolean (value) {
   return checkBoolean(value) || false
@@ -35,7 +35,7 @@ function parseObject (value) {
     return _.map(value, function (n, key) {
       return parse(n)
     })
-  } else if (typpy, Object) {
+  } else if (typpy(value, Object)) {
     return _.forIn(value, function (n, key) {
       value[key] = parse(n)
     })
@@ -51,69 +51,68 @@ function parseFunction (value) {
 function parseType (value, type) {
   // Currently they send a string - handle String or Number or Boolean?
 
-  var typeName = type;
+  var typeName = type
   // Convert the constructor into a string
   if (type && type.name) {
-      typeName = type.name.toLowerCase()
+    typeName = type.name.toLowerCase()
   }
 
   typeName = stripTrimLower(typeName)
   switch (typeName) {
-      case 'string':
-        if (typeof value === 'object') return JSON.stringify(value)
-        return _.toString(value)
+    case 'string':
+      if (typeof value === 'object') return JSON.stringify(value)
+      return _.toString(value)
 
-      case 'function':
-        if (typpy(value, Function)) {
-          return value
+    case 'function':
+      if (typpy(value, Function)) {
+        return value
+      }
+
+      return function (cb) {
+        if (typeof cb === 'function') {
+          cb(value)
         }
+        return value
+      }
 
-        return function (cb) {
-          if (typeof cb === 'function') {
-            cb(value)
-          }
-          return value
-        }
+    case 'date':
+      return new Date(value)
 
-      case 'date':
-          return new Date(value)
+    case 'object':
+      var jsonParsed
+      try {
+        jsonParsed = JSON.parse(value)
+      } catch (e) {}
 
-      case 'object':
-        var jsonParsed = undefined;
-        try {
-          jsonParsed = JSON.parse(value)
-        } catch (e) {}
+      if (typpy(jsonParsed, Object) || typpy(jsonParsed, Array)) {
+        return parse(jsonParsed)
+      } else if (!typpy(jsonParsed, 'undefined')) {
+        return {}
+      }
 
-        if (typpy(jsonParsed, Object) || typpy(jsonParsed, Array)) {
-          return parse(jsonParsed)
-        } else if (!typpy(jsonParsed, 'undefined')) {
-          return {}
-        }
+      return parseObject(value)
 
-        return parseObject(value)
+    case 'boolean':
+      return toBoolean(value)
 
-      case 'boolean':
-        return toBoolean(value)
+    case 'number':
+      return _.toNumber(value)
 
-      case 'number':
-        return _.toNumber(value)
+    case 'undefined':
+      return undefined
 
-      case 'undefined':
-        return undefined
+    case 'null':
+      return null
 
-      case 'null':
-        return null
-
-      default:
-          if (typeof type === "function") {
-            return new type(value);
-          }
-          throw new Error("Unsupported type.")
+    default:
+      if (typeof type === 'function') {
+        return new type(value) // eslint-disable-line 
+      }
+      throw new Error('Unsupported type.')
   }
 }
 
 function parse (value, type) {
-
   if (type) {
     return parseType(value, type)
   }

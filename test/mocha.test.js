@@ -1,7 +1,7 @@
 var autoParse = require('../index.js')
 
 function Color (inputColor) {
-    this.color = inputColor
+  this.color = inputColor
 }
 
 var assert = require('chai').assert
@@ -228,7 +228,7 @@ describe('Auto Parse', function () {
   describe('Convert Type', function () {
     it('to color', function () {
       assert.deepEqual(autoParse('#AAA', Color), {
-          color: "#AAA"
+        color: '#AAA'
       })
     })
     it('to Date', function () {
@@ -310,7 +310,7 @@ describe('Auto Parse', function () {
       assert.equal(autoParse('False', 'Boolean'), false)
       assert.equal(autoParse(true, 'Boolean'), true)
       assert.equal(autoParse(false, 'Boolean'), false)
-      assert.equal(autoParse("foo", 'Boolean'), false)
+      assert.equal(autoParse('foo', 'Boolean'), false)
     })
     it('* to number', function () {
       assert.equal(autoParse(1, 'Number'), 1)
