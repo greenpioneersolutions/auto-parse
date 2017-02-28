@@ -10,7 +10,7 @@
   "devDependencies": {
     "chai": "^3.5.0",
     "mocha": "^3.1.0",
-    "standard": "^8.3.0"
+    "standard": "^9.0.0"
   },
   "scripts": {
     "test": "npm run mocha && npm run standard",
