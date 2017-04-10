@@ -338,5 +338,12 @@ describe('Auto Parse', function () {
       assert.equal(autoParse('1', 'Null'), null)
       assert.equal(autoParse('0', 'Null'), null)
     })
+    it('same type to same type', function () {
+      assert.deepEqual(autoParse([42], Array), [42])
+      assert.deepEqual(autoParse({name: 'greenpioneer'}, Object), {name: 'greenpioneer'})
+      assert.equal(autoParse(true, Boolean), true)
+      assert.equal(autoParse('test', String), 'test')
+      assert.equal(autoParse(1234, Number), 1234)
+    })
   })
 })
