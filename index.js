@@ -50,6 +50,9 @@ function parseFunction (value) {
 
 function parseType (value, type) {
   // Currently they send a string - handle String or Number or Boolean?
+  if ((value && value.constructor === type) || typpy(value, type)) {
+    return value
+  }
 
   var typeName = type
   // Convert the constructor into a string
@@ -104,9 +107,12 @@ function parseType (value, type) {
     case 'null':
       return null
 
+    case 'array':
+      return [value]
+
     default:
       if (typeof type === 'function') {
-        return new type(value) // eslint-disable-line 
+        return new type(value) // eslint-disable-line
       }
       throw new Error('Unsupported type.')
   }
