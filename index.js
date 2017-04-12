@@ -1,15 +1,10 @@
 module.exports = parse
 
-var _ = require('lodash')
 var typpy = require('typpy')
 
 function stripTrimLower (value) {
-  return _.replace(_.trim(_.toLower(value)), /[""'']/ig, '')
+  return value.replace(/[""'']/ig, '').trim().toLowerCase()
 }
-
-// function isBoolean (value) {
-//   return !(checkBoolean(value) === null)
-// }
 
 function toBoolean (value) {
   return checkBoolean(value) || false
@@ -32,13 +27,14 @@ function checkBoolean (value) {
 
 function parseObject (value) {
   if (typpy(value, Array)) {
-    return _.map(value, function (n, key) {
+    return value.map(function (n, key) {
       return parse(n)
     })
   } else if (typpy(value, Object)) {
-    return _.forIn(value, function (n, key) {
-      value[key] = parse(n)
-    })
+    for (var n in value) {
+      value[n] = parse(value[n])
+    }
+    return value
   }
 
   return {}
@@ -64,7 +60,7 @@ function parseType (value, type) {
   switch (typeName) {
     case 'string':
       if (typeof value === 'object') return JSON.stringify(value)
-      return _.toString(value)
+      return value.toString()
 
     case 'function':
       if (typpy(value, Function)) {
@@ -99,7 +95,7 @@ function parseType (value, type) {
       return toBoolean(value)
 
     case 'number':
-      return _.toNumber(value)
+      return Number(value)
 
     case 'undefined':
       return undefined
@@ -173,7 +169,7 @@ function parse (value, type) {
   }
 
   // Order Matter because if it is a one or zero boolean will come back with a awnser too. if you want it to be a boolean you must specify
-  var num = _.toNumber(value)
+  var num = Number(value)
   if (typpy(num, Number)) {
     return num
   }
@@ -184,6 +180,6 @@ function parse (value, type) {
   }
 
   // DEFUALT SECTION - bascially if we catch nothing we assume that you just have a string
-  var string = _.toString(orignalValue)
+  var string = orignalValue.toString()
   return string
 }
