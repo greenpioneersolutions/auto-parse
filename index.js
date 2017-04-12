@@ -60,7 +60,7 @@ function parseType (value, type) {
   switch (typeName) {
     case 'string':
       if (typeof value === 'object') return JSON.stringify(value)
-      return value.toString()
+      return String(value)
 
     case 'function':
       if (typpy(value, Function)) {
@@ -180,6 +180,6 @@ function parse (value, type) {
   }
 
   // DEFUALT SECTION - bascially if we catch nothing we assume that you just have a string
-  var string = orignalValue.toString()
+  var string = String(orignalValue)
   return string
 }
