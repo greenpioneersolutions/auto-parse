@@ -4,13 +4,12 @@
   "description": "auto-parse any value you happen to send in (String, Number, Boolean,Array, Object, Function, undefined and null). You send it we will try to find a way to parse it.support sending in a string of what type (e.g. boolean) or constructor (e.g. Boolean)",
   "main": "index.js",
   "dependencies": {
-    "lodash": "^4.16.3",
-    "typpy": "^2.3.6"
+    "typpy": "^2.3.10"
   },
   "devDependencies": {
-    "chai": "^3.5.0",
-    "mocha": "^3.1.0",
-    "standard": "^8.3.0"
+    "chai": "^4.1.2",
+    "mocha": "^5.0.4",
+    "standard": "^11.0.0"
   },
   "scripts": {
     "test": "npm run mocha && npm run standard",
