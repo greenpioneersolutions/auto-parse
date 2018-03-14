@@ -14,7 +14,8 @@
   "scripts": {
     "test": "npm run mocha && npm run standard",
     "mocha": "node node_modules/mocha/bin/mocha test/mocha.test.js  ",
-    "standard": "node node_modules/standard/bin/cmd.js || standard"
+    "standard": "node node_modules/standard/bin/cmd.js || standard",
+    "standard:fix": "node node_modules/standard/bin/cmd.js --fix || standard --fix"
   },
   "repository": {
     "type": "git",

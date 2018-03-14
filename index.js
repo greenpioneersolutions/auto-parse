@@ -3,7 +3,7 @@ module.exports = parse
 var typpy = require('typpy')
 
 /**
- * 
+ *
  * @name stripTrimLower
  * @function
  * @param {Value} value strip trim & lower case the string
@@ -14,7 +14,7 @@ function stripTrimLower (value) {
   return value.replace(/[""'']/ig, '').trim().toLowerCase()
 }
 /**
- * 
+ *
  * @name toBoolean
  * @function
  * @param {Value} value parse to boolean
@@ -25,11 +25,11 @@ function toBoolean (value) {
   return checkBoolean(value) || false
 }
 /**
- * 
+ *
  * @name checkBoolean
  * @function
  * @param {Value} value is any value
- * @return {Boolean} is a boolean value 
+ * @return {Boolean} is a boolean value
  *
  */
 function checkBoolean (value) {
@@ -47,7 +47,7 @@ function checkBoolean (value) {
   return null
 }
 /**
- * 
+ *
  * @name parseObject
  * @function
  * @param {Value} value parse object
@@ -68,7 +68,7 @@ function parseObject (value) {
   return {}
 }
 /**
- * 
+ *
  * @name parseFunction
  * @function
  * @param {Value} value function
@@ -79,7 +79,7 @@ function parseFunction (value) {
   return parse(value())
 }
 /**
- * 
+ *
  * @name parseType
  * @function
  * @param {Value} value inputed value
@@ -151,9 +151,9 @@ function parseType (value, type) {
 }
 /**
  * Parse
- * auto-parse any value you happen to send in 
- * (String, Number, Boolean, Array, Object, Function, undefined and null). 
- * You send it we will try to find a way to parse it. 
+ * auto-parse any value you happen to send in
+ * (String, Number, Boolean, Array, Object, Function, undefined and null).
+ * You send it we will try to find a way to parse it.
  * We now support sending in a string of what type
  * (e.g. "boolean") or constructor (e.g. Boolean)
  *
@@ -169,7 +169,7 @@ function parseType (value, type) {
  * @function
  * @param {Value} input The input value.
  * @param {Constructor|String} target The target type.
- * @return {String|Function|Date|Object|Boolean|Number|Undefined|Null|Array} 
+ * @return {String|Function|Date|Object|Boolean|Number|Undefined|Null|Array}
  */
 function parse (value, type) {
   if (type) {
