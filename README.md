@@ -21,8 +21,16 @@ try to find a way to parse it. We now support sending in a string of what type (
 
 ## Installation
 ```sh
+# NPM
 npm install auto-parse --save
+# YARN
+yarn add auto-parse
 ```
+
+## Whats New
+
+* [#12 Browser Support](https://github.com/greenpioneersolutions/auto-parse/issues/12)
+* [#11 Removed Lodash](https://github.com/greenpioneersolutions/auto-parse/issues/11)
 
 ## Documentation
 
@@ -95,10 +103,24 @@ autoParse('#AAA', Color)  =>  {color: '#AAA'}
 - [Check out JS Fiddle Example](https://jsfiddle.net/greenpioneer/4y744xyd/)
 
 #### Other Uses
+
+Lodash 
+
 ``` js
 // Lodash Mixin
 var autoParse = require('auto-parse')
  _.mixin({'autoParse':autoParse})
+```
+
+Browser Support
+
+``` html
+<h1>Auto Parse </h1>
+<script src="/node_modules/auto-parse/dist/auto-parse.min.js"></script>
+<script>
+  autoParse('true')
+  autoParse('Green Pioneer')
+</script>
 ```
 
 ## License
