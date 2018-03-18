@@ -1,3 +1,4 @@
+(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.autoParse = f()}})(function(){var define,module,exports;return (function(){function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s}return e})()({1:[function(require,module,exports){
 module.exports = autoParse
 
 var typpy = require('typpy')
@@ -236,3 +237,132 @@ function autoParse (value, type) {
   var string = String(orignalValue)
   return string
 }
+
+},{"typpy":4}],2:[function(require,module,exports){
+"use strict";
+
+var noop6 = require("noop6");
+
+(function () {
+    var NAME_FIELD = "name";
+
+    if (typeof noop6.name === "string") {
+        return;
+    }
+
+    try {
+        Object.defineProperty(Function.prototype, NAME_FIELD, {
+            get: function get() {
+                var name = this.toString().trim().match(/^function\s*([^\s(]+)/)[1];
+                Object.defineProperty(this, NAME_FIELD, { value: name });
+                return name;
+            }
+        });
+    } catch (e) {}
+})();
+
+/**
+ * functionName
+ * Get the function name.
+ *
+ * @name functionName
+ * @function
+ * @param {Function} input The input function.
+ * @returns {String} The function name.
+ */
+module.exports = function functionName(input) {
+    return input.name;
+};
+},{"noop6":3}],3:[function(require,module,exports){
+"use strict";
+
+module.exports = function () {};
+},{}],4:[function(require,module,exports){
+"use strict";
+
+require("function.name");
+
+/**
+ * Typpy
+ * Gets the type of the input value or compares it
+ * with a provided type.
+ *
+ * Usage:
+ *
+ * ```js
+ * Typpy({}) // => "object"
+ * Typpy(42, Number); // => true
+ * Typpy.get([], "array"); => true
+ * ```
+ *
+ * @name Typpy
+ * @function
+ * @param {Anything} input The input value.
+ * @param {Constructor|String} target The target type.
+ * It could be a string (e.g. `"array"`) or a
+ * constructor (e.g. `Array`).
+ * @return {String|Boolean} It returns `true` if the
+ * input has the provided type `target` (if was provided),
+ * `false` if the input type does *not* have the provided type
+ * `target` or the stringified type of the input (always lowercase).
+ */
+function Typpy(input, target) {
+    if (arguments.length === 2) {
+        return Typpy.is(input, target);
+    }
+    return Typpy.get(input, true);
+}
+
+/**
+ * Typpy.is
+ * Checks if the input value has a specified type.
+ *
+ * @name Typpy.is
+ * @function
+ * @param {Anything} input The input value.
+ * @param {Constructor|String} target The target type.
+ * It could be a string (e.g. `"array"`) or a
+ * constructor (e.g. `Array`).
+ * @return {Boolean} `true`, if the input has the same
+ * type with the target or `false` otherwise.
+ */
+Typpy.is = function (input, target) {
+    return Typpy.get(input, typeof target === "string") === target;
+};
+
+/**
+ * Typpy.get
+ * Gets the type of the input value. This is used internally.
+ *
+ * @name Typpy.get
+ * @function
+ * @param {Anything} input The input value.
+ * @param {Boolean} str A flag to indicate if the return value
+ * should be a string or not.
+ * @return {Constructor|String} The input value constructor
+ * (if any) or the stringified type (always lowercase).
+ */
+Typpy.get = function (input, str) {
+
+    if (typeof input === "string") {
+        return str ? "string" : String;
+    }
+
+    if (null === input) {
+        return str ? "null" : null;
+    }
+
+    if (undefined === input) {
+        return str ? "undefined" : undefined;
+    }
+
+    if (input !== input) {
+        return str ? "nan" : NaN;
+    }
+
+    return str ? input.constructor.name.toLowerCase() : input.constructor;
+};
+
+module.exports = Typpy;
+},{"function.name":2}]},{},[1])(1)
+});
