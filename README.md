@@ -20,7 +20,7 @@
 try to find a way to parse it. We now support sending in a string of what type (e.g. "boolean") or constructor (e.g. Boolean)
 
 ## Installation
-```sh
+``` bash
 # NPM
 npm install auto-parse --save
 # YARN
