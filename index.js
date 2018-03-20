@@ -39,11 +39,9 @@ function checkBoolean (value) {
   if (typeof value === 'number' || typeof value === 'boolean') {
     return !!value
   }
-
   value = stripTrimLower(value)
   if (value === 'true' || value === '1') return true
   if (value === 'false' || value === '0') return false
-
   return null
 }
 /**
@@ -94,7 +92,6 @@ function parseType (value, type) {
   if ((value && value.constructor === type) || typpy(value, type)) {
     return value
   }
-
   var typeName = type
   /**
    * Convert the constructor into a string
@@ -108,7 +105,6 @@ function parseType (value, type) {
     case 'string':
       if (typeof value === 'object') return JSON.stringify(value)
       return String(value)
-
     case 'function':
       if (typpy(value, Function)) {
         return value
@@ -208,7 +204,6 @@ function autoParse (value, type) {
   try {
     jsonParsed = JSON.parse(value)
   } catch (e) {}
-
   if (jsonParsed && typeof jsonParsed === 'object') {
     return autoParse(jsonParsed)
   }
@@ -233,6 +228,5 @@ function autoParse (value, type) {
   /**
    * DEFAULT SECTION - bascially if we catch nothing we assume that you just have a string
    */
-  var string = String(orignalValue)
-  return string
+  return String(orignalValue)
 }
