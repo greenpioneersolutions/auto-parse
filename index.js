@@ -203,7 +203,13 @@ function autoParse (value, type) {
   var jsonParsed = null
   try {
     jsonParsed = JSON.parse(value)
-  } catch (e) {}
+  } catch (e) {
+    try {
+      jsonParsed = JSON.parse(
+        value.trim().replace(/(\\\\")|(\\")/gi, '"').replace(/(\\n|\\\\n)/gi, '').replace(/(^"|"$)|(^'|'$)/gi, '')
+      )
+    } catch (e) { }
+  }
   if (jsonParsed && typeof jsonParsed === 'object') {
     return autoParse(jsonParsed)
   }
