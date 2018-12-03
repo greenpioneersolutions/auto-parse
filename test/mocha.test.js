@@ -216,6 +216,36 @@ describe('Auto Parse', function () {
     it('["42"]', function () {
       assert.deepEqual(autoParse('["42"]'), [42])
     })
+    it('{test:"{"name":"gps"}"}', function () {
+      assert.deepEqual(autoParse({test:'{\\"name\\": \"greenpioneer\",\n \"company\": true,\n \\"customers\\": 1000}'}), { // eslint-disable-line
+        test: {
+          name: 'greenpioneer',
+          company: true,
+          customers: 1000
+        }
+      })
+    })
+    it('\\n', function () {
+      assert.deepEqual(autoParse('{\\"name\\": \"greenpioneer\",\n \"company\": true,\n \\"customers\\": 1000}'), { // eslint-disable-line
+        name: 'greenpioneer',
+        company: true,
+        customers: 1000
+      })
+    })
+    it('\\"', function () {
+      assert.deepEqual(autoParse('{\\"name\\": \"greenpioneer\",\"company\": true,\\"customers\\": 1000}'), { // eslint-disable-line
+        name: 'greenpioneer',
+        company: true,
+        customers: 1000
+      })
+    })
+    it('"{}"', function () {
+      assert.deepEqual(autoParse('"{"name": "greenpioneer","company": true,"customers": 1000}"'), { // eslint-disable-line
+        name: 'greenpioneer',
+        company: true,
+        customers: 1000
+      })
+    })
   })
   describe('handle NaNs', function () {
     it('NaN', function () {

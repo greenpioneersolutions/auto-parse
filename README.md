@@ -28,7 +28,7 @@ yarn add auto-parse
 ```
 
 ## Whats New
-
+* [#14 parse object (amazon support)](https://github.com/greenpioneersolutions/auto-parse/issues/12)
 * [#12 Browser Support](https://github.com/greenpioneersolutions/auto-parse/issues/12)
 * [#11 Removed Lodash](https://github.com/greenpioneersolutions/auto-parse/issues/11)
 
@@ -70,6 +70,10 @@ autoParse({
 }) => {name:'jason',age:50,admin:true,grade:[80,90,100]}
 autoParse('{}') => {}
 autoParse('["42"]')  => [42]
+autoParse({test:'{\\"name\\": \"greenpioneer\",\n \"company\": true,\n \\"customers\\": 1000}'}) => { test: Object }
+autoParse('{\\"name\\": \"greenpioneer\",\n \"company\": true,\n \\"customers\\": 1000}') => Object
+autoParse('{\\"name\\": \"greenpioneer\",\"company\": true,\\"customers\\": 1000}') => Object
+autoParse('"{"name": "greenpioneer","company": true,"customers": 1000}"') => Object
 // Numbers
 autoParse('NaN') => NaN
 autoParse('26') => 26
@@ -127,7 +131,7 @@ Browser Support
 
 The MIT License (MIT)
 
-Copyright (c) 2014-2018 Green Pioneer
+Copyright (c) 2014-2019 Green Pioneer
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
