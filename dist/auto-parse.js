@@ -58,7 +58,7 @@ function parseObject (value) {
     return value.map(function (n, key) {
       return autoParse(n)
     })
-  } else if (typpy(value, Object)) {
+  } else if (typpy(value, Object) || value.constructor === undefined) {
     for (var n in value) {
       value[n] = autoParse(value[n])
     }
@@ -186,6 +186,9 @@ function autoParse (value, type) {
   if (value === void 0) {
     return undefined
   }
+  if (value instanceof Date || value instanceof RegExp) {
+    return value
+  }
   if (typeof value === 'number' || typeof value === 'boolean') {
     return value
   }
@@ -253,7 +256,8 @@ var noop6 = require("noop6");
     try {
         Object.defineProperty(Function.prototype, NAME_FIELD, {
             get: function get() {
-                var name = this.toString().trim().match(/^function\s*([^\s(]+)/)[1];
+                var nameMatch = this.toString().trim().match(/^function\s*([^\s(]+)/);
+                var name = nameMatch ? nameMatch[1] : "";
                 Object.defineProperty(this, NAME_FIELD, { value: name });
                 return name;
             }

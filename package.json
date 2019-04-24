@@ -4,7 +4,7 @@
   "description": "auto-parse any value you happen to send in (String, Number, Boolean,Array, Object, Function, undefined and null). You send it we will try to find a way to parse it.support sending in a string of what type (e.g. boolean) or constructor (e.g. Boolean)",
   "main": "index.js",
   "dependencies": {
-    "typpy": "2.3.10"
+    "typpy": "2.3.11"
   },
   "devDependencies": {
     "browserify": "16.2.3",

@@ -57,7 +57,7 @@ function parseObject (value) {
     return value.map(function (n, key) {
       return autoParse(n)
     })
-  } else if (typpy(value, Object)) {
+  } else if (typpy(value, Object) || value.constructor === undefined) {
     for (var n in value) {
       value[n] = autoParse(value[n])
     }
@@ -184,6 +184,9 @@ function autoParse (value, type) {
    */
   if (value === void 0) {
     return undefined
+  }
+  if (value instanceof Date || value instanceof RegExp) {
+    return value
   }
   if (typeof value === 'number' || typeof value === 'boolean') {
     return value
