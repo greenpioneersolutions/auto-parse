@@ -28,9 +28,12 @@ yarn add auto-parse
 ```
 
 ## Whats New
-* [#14 parse object (amazon support)](https://github.com/greenpioneersolutions/auto-parse/issues/12)
-* [#12 Browser Support](https://github.com/greenpioneersolutions/auto-parse/issues/12)
+
 * [#11 Removed Lodash](https://github.com/greenpioneersolutions/auto-parse/issues/11)
+* [#12 Browser Support](https://github.com/greenpioneersolutions/auto-parse/issues/12)
+* [#14 parse object (amazon support)](https://github.com/greenpioneersolutions/auto-parse/issues/14)
+* [#16 Support For Object.create(null)](https://github.com/greenpioneersolutions/auto-parse/issues/16)
+* [#17 Support Instances of Date & Regex Constructors](https://github.com/greenpioneersolutions/auto-parse/issues/17)
 
 ## Documentation
 
@@ -102,6 +105,11 @@ function Color (inputColor) {
   this.color = inputColor
 }
 autoParse('#AAA', Color)  =>  {color: '#AAA'}
+// Specific Instances
+autoParse(new Date) =>  Thu Nov 30 1989 18:00:00 GMT-0600 (CST)
+autoParse(/123/) =>  /123/ // Regex
+// functions that return no props - Object.create(null)
+autoParse(qs.parse('?order=asc&orderBy=1')) => { order:'asc', orderBy:1 }
 ```
 - [Check out Run Kit Example](https://runkit.com/greenpioneer/auto-parse)
 - [Check out JS Fiddle Example](https://jsfiddle.net/greenpioneer/4y744xyd/)
