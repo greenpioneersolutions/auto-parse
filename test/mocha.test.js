@@ -1,10 +1,19 @@
 var autoParse = require('../index.js')
+var assert = require('chai').assert
 
 function Color (inputColor) {
   this.color = inputColor
 }
 
-var assert = require('chai').assert
+function parse (ret) {
+  // Test case from here - https://github.com/greenpioneersolutions/auto-parse/issues/16
+  return Object.keys(ret).sort().reduce((result, key) => {
+    const value = ret[key]
+    result[key] = value
+    return result
+  }, Object.create(null))
+}
+
 describe('Auto Parse', function () {
   describe('Strings', function () {
     it('Green Pioneer', function () {
@@ -158,6 +167,42 @@ describe('Auto Parse', function () {
       assert.equal(autoParse(data).parents[0].name, 'Alice')
       assert.equal(autoParse(data).parents[0].age, 75)
     })
+    it('parsing Object.create(null) Objects', function () {
+      var value = autoParse(parse({ order: 'asc', orderBy: '1', filterOn: 'true' }))
+      assert.deepEqual(value, { order: 'asc', orderBy: 1, filterOn: true })
+      assert.typeOf(value.order, 'string')
+      assert.typeOf(value.orderBy, 'number')
+      assert.typeOf(value.filterOn, 'boolean')
+    })
+  })
+  describe('Date', function () {
+    it('new Date', function () {
+      var value = new Date // eslint-disable-line
+      assert.equal(autoParse(value), value)
+      assert.instanceOf(autoParse(value), Date)
+    })
+    it('new Date()', function () {
+      var value = new Date()
+      assert.equal(autoParse(value), value)
+      assert.instanceOf(autoParse(value), Date)
+    })
+    it('new Date()', function () {
+      var value = new Date('1989-12-01')
+      assert.deepEqual(autoParse(value), value)
+      assert.instanceOf(autoParse(value), Date)
+    })
+  })
+  describe('Regex', function () {
+    it('/\w+/', function () { // eslint-disable-line 
+      var regex1 = /\w+/
+      assert.equal(autoParse(regex1), regex1)
+      assert.instanceOf(autoParse(regex1), RegExp)
+    })
+    it('new RegExp("\\w+")', function () {
+      var regex2 = new RegExp('\\w+')
+      assert.equal(autoParse(regex2), regex2)
+      assert.instanceOf(autoParse(regex2), RegExp)
+    })
   })
   describe('Function', function () {
     it('return "9" to 9', function () {
@@ -263,7 +308,9 @@ describe('Auto Parse', function () {
     })
     it('to Date', function () {
       assert.deepEqual(autoParse('1989-12-01', Date), new Date('1989-12-01'))
+      assert.instanceOf(autoParse('1989-12-01', Date), Date)
       assert.deepEqual(autoParse('1989-12-01', 'date'), new Date('1989-12-01'))
+      assert.instanceOf(autoParse('1989-12-01', 'date'), Date)
     })
     it('* to String', function () {
       var data = function () {
