@@ -50,6 +50,12 @@ describe('Auto Parse', function () {
     })
   })
   describe('Number', function () {
+    it('thousands String with commas to Number', function () {
+      assert.equal(autoParse('385,134', { remove: [','] }), 385134)
+    })
+    it('thousands String with commas to Number', function () {
+      assert.equal(autoParse('198,385,134', { remove: [','] }), 198385134)
+    })
     it('hexadecimals String to Number', function () {
       assert.equal(autoParse('0xFF'), 255)
     })
@@ -486,6 +492,20 @@ describe('Auto Parse', function () {
       assert.equal(autoParse(true, Boolean), true)
       assert.equal(autoParse('test', String), 'test')
       assert.equal(autoParse(1234, Number), 1234)
+    })
+  })
+  describe('Options', function () {
+    it('remove periods', function () {
+      assert.equal(autoParse('.42', { remove: ['\\.'] }), 42)
+      assert.equal(autoParse('1.44.0', { remove: ['\\.'] }), 1440)
+    })
+    it('remove commas', function () {
+      assert.equal(autoParse('198,385,134', { remove: ['\\,'] }), 198385134)
+      assert.equal(autoParse('385,134', { remove: ['\\,'] }), 385134)
+    })
+    it('remove commas & periods', function () {
+      assert.equal(autoParse('198,385,134.00', { remove: ['\\,', '\\.'] }), 19838513400)
+      assert.equal(autoParse('385,134.00', { remove: ['\\,', '\\.'] }), 38513400)
     })
   })
 })

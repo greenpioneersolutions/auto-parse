@@ -168,7 +168,23 @@ function parseType (value, type) {
  * @param {Constructor|String} target The target type.
  * @return {String|Function|Date|Object|Boolean|Number|Undefined|Null|Array}
  */
-function autoParse (value, type) {
+function autoParse (value, type, options) {
+  if (type && typeof type === 'object') {
+    options = type
+    type = undefined
+  }
+  if (options && options.remove) {
+    var valueRegExp
+    if (typeof options.remove === 'object') {
+      for (var i = 0; i < options.remove.length; i++) {
+        valueRegExp = new RegExp((options.remove[i]), 'g')
+        value = value.replace(valueRegExp, '')
+      }
+    } else {
+      valueRegExp = new RegExp(options.remove[i], 'g')
+      value = value.replace(valueRegExp, '')
+    }
+  }
   if (type) {
     return parseType(value, type)
   }

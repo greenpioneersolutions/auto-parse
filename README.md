@@ -35,14 +35,22 @@ yarn add auto-parse
 * [#16 Support For Object.create(null)](https://github.com/greenpioneersolutions/auto-parse/issues/16)
 * [#17 Support Instances of Date & Regex Constructors](https://github.com/greenpioneersolutions/auto-parse/issues/17)
 * [#18 Parsing Array Strings Only Works On Double Quotes](https://github.com/greenpioneersolutions/auto-parse/issues/18)
+* [#20 Accepting Options - Remove & Types](https://github.com/greenpioneersolutions/auto-parse/issues/20)
 
 ## Documentation
 
-### autoParse(input, type)
+### autoParse(input, [type, [options]])
 
 #### Params
 - **Anything** `input`: The input value you want parsed
 - **Constructor|String** `type`: The type. It could be a string (e.g. "array") or a constructor (e.g. Array).
+- **Object** `options`: The options can only currently support remove an array of regex checks to remove.
+  ```
+  {
+    remove: ['\\,', '\\.']
+    types: [String, Number] // NOT BUILT YET ON THIS OPTION
+  }
+  ```
 	
 #### Return
 - **Parsed Value** Could return String, Number, Boolean, Object, Array, Null, NaN, Undefined & Date 
@@ -116,6 +124,11 @@ autoParse(new Date) =>  Thu Nov 30 1989 18:00:00 GMT-0600 (CST)
 autoParse(/123/) =>  /123/ // Regex
 // functions that return no props - Object.create(null)
 autoParse(qs.parse('?order=asc&orderBy=1')) => { order:'asc', orderBy:1 }
+// Options
+autoParse('198,385,134.00', { remove: ['\\,', '\\.'] }) => 19838513400)
+autoParse('385,134.00', { remove: ['\\,', '\\.'] }) => 38513400
+autoParse('.42', { remove: ['\\.'] }) => 42
+autoParse('1.44.0', { remove: ['\\.'] }) => 1440
 ```
 - [Check out Run Kit Example](https://runkit.com/greenpioneer/auto-parse)
 - [Check out JS Fiddle Example](https://jsfiddle.net/greenpioneer/4y744xyd/)
