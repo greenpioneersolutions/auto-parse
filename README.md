@@ -34,6 +34,7 @@ yarn add auto-parse
 * [#14 parse object (amazon support)](https://github.com/greenpioneersolutions/auto-parse/issues/14)
 * [#16 Support For Object.create(null)](https://github.com/greenpioneersolutions/auto-parse/issues/16)
 * [#17 Support Instances of Date & Regex Constructors](https://github.com/greenpioneersolutions/auto-parse/issues/17)
+* [#18 Parsing Array Strings Only Works On Double Quotes](https://github.com/greenpioneersolutions/auto-parse/issues/18)
 
 ## Documentation
 
@@ -64,6 +65,11 @@ autoParse(function () {
 autoParse(' Undefined ') => undefined
 autoParse(' Null ') => null
 // Objects & Arrays
+autoParse("['2332','2343','2343','2342','3233']") => [2332,2343,2343,2342,3233]
+autoParse(`'["80", 92, "23", "TruE",false]'`) => [80, 92, 23, true, false]
+autoParse('["80", 92, "23", "TruE",false]') => [80, 92, 23, true, false]
+autoParse("['80', 92, '23', 'TruE',false]") => [80, 92, 23, true, false]
+autoParse(`["80", 92, "23", "TruE", false]`) => [80, 92, 23, true, false]
 autoParse(['80', '92', '23', 'TruE', false]) => [80, 92, 23, true, false]
 autoParse({
   name: 'jason', // Parses as a String

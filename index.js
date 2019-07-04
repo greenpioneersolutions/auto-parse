@@ -211,7 +211,13 @@ function autoParse (value, type) {
       jsonParsed = JSON.parse(
         value.trim().replace(/(\\\\")|(\\")/gi, '"').replace(/(\\n|\\\\n)/gi, '').replace(/(^"|"$)|(^'|'$)/gi, '')
       )
-    } catch (e) { }
+    } catch (e) {
+      try {
+        jsonParsed = JSON.parse(
+          value.trim().replace(/'/gi, '"')
+        )
+      } catch (e) {}
+    }
   }
   if (jsonParsed && typeof jsonParsed === 'object') {
     return autoParse(jsonParsed)
@@ -237,5 +243,6 @@ function autoParse (value, type) {
   /**
    * DEFAULT SECTION - bascially if we catch nothing we assume that you just have a string
    */
+  // if string - convert to ""
   return String(orignalValue)
 }

@@ -117,6 +117,71 @@ describe('Auto Parse', function () {
     })
   })
   describe('Array', function () {
+    it(`"['2332','2343','2343','2342','3233']"`, function () {
+      var data = "['2332','2343','2343','2342','3233']"
+      assert.equal(autoParse(data)[0], 2332)
+      assert.typeOf(autoParse(data)[0], 'number')
+      assert.equal(autoParse(data)[1], 2343)
+      assert.typeOf(autoParse(data)[1], 'number')
+      assert.equal(autoParse(data)[2], 2343)
+      assert.typeOf(autoParse(data)[2], 'number')
+      assert.equal(autoParse(data)[3], 2342)
+      assert.typeOf(autoParse(data)[3], 'number')
+      assert.equal(autoParse(data)[4], 3233)
+      assert.typeOf(autoParse(data)[4], 'number')
+    })
+    it(`'["80", 92, "23", "TruE",false]'`, function () {
+      var data = `'["80", 92, "23", "TruE",false]'`
+      assert.equal(autoParse(data)[0], 80)
+      assert.typeOf(autoParse(data)[0], 'number')
+      assert.equal(autoParse(data)[1], 92)
+      assert.typeOf(autoParse(data)[1], 'number')
+      assert.equal(autoParse(data)[2], 23)
+      assert.typeOf(autoParse(data)[2], 'number')
+      assert.equal(autoParse(data)[3], true)
+      assert.typeOf(autoParse(data)[3], 'boolean')
+      assert.equal(autoParse(data)[4], false)
+      assert.typeOf(autoParse(data)[4], 'boolean')
+    })
+    it(`'["80", 92, "23", "TruE",false]'`, function () {
+      var data = '["80", 92, "23", "TruE",false]'
+      assert.equal(autoParse(data)[0], 80)
+      assert.typeOf(autoParse(data)[0], 'number')
+      assert.equal(autoParse(data)[1], 92)
+      assert.typeOf(autoParse(data)[1], 'number')
+      assert.equal(autoParse(data)[2], 23)
+      assert.typeOf(autoParse(data)[2], 'number')
+      assert.equal(autoParse(data)[3], true)
+      assert.typeOf(autoParse(data)[3], 'boolean')
+      assert.equal(autoParse(data)[4], false)
+      assert.typeOf(autoParse(data)[4], 'boolean')
+    })
+    it(`"['80', 92, '23', 'TruE',false]"`, function () {
+      var data = "['80', 92, '23', 'TruE',false]"
+      assert.equal(autoParse(data)[0], 80)
+      assert.typeOf(autoParse(data)[0], 'number')
+      assert.equal(autoParse(data)[1], 92)
+      assert.typeOf(autoParse(data)[1], 'number')
+      assert.equal(autoParse(data)[2], 23)
+      assert.typeOf(autoParse(data)[2], 'number')
+      assert.equal(autoParse(data)[3], true)
+      assert.typeOf(autoParse(data)[3], 'boolean')
+      assert.equal(autoParse(data)[4], false)
+      assert.typeOf(autoParse(data)[4], 'boolean')
+    })
+    it('`["80", 92, "23", "TruE",false]`', function () {
+      var data = `["80", 92, "23", "TruE", false]`
+      assert.equal(autoParse(data)[0], 80)
+      assert.typeOf(autoParse(data)[0], 'number')
+      assert.equal(autoParse(data)[1], 92)
+      assert.typeOf(autoParse(data)[1], 'number')
+      assert.equal(autoParse(data)[2], 23)
+      assert.typeOf(autoParse(data)[2], 'number')
+      assert.equal(autoParse(data)[3], true)
+      assert.typeOf(autoParse(data)[3], 'boolean')
+      assert.equal(autoParse(data)[4], false)
+      assert.typeOf(autoParse(data)[4], 'boolean')
+    })
     it('["80", 92, "23", "TruE",false]', function () {
       var data = ['80', 92, '23', 'TruE', false]
       assert.equal(autoParse(data)[0], 80)
