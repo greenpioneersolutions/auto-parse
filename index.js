@@ -7,6 +7,7 @@ function isType (value, type) {
     if (type.toLowerCase() === 'array') return Array.isArray(value)
     if (type.toLowerCase() === 'null') return value === null
     if (type.toLowerCase() === 'undefined') return value === undefined
+    // eslint-disable-next-line valid-typeof
     return typeof value === type.toLowerCase()
   }
   if (type === Array) return Array.isArray(value)
@@ -224,6 +225,7 @@ function autoParse (value, type) {
   if (value instanceof Date || value instanceof RegExp) {
     return value
   }
+  // eslint-disable-next-line valid-typeof
   if (typeof value === 'number' || typeof value === 'boolean' || typeof value === 'bigint' || typeof value === 'symbol') {
     return value
   }
