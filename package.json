@@ -3,25 +3,25 @@
   "version": "1.8.0",
   "description": "auto-parse any value you happen to send in (String, Number, Boolean,Array, Object, Function, undefined and null). You send it we will try to find a way to parse it.support sending in a string of what type (e.g. boolean) or constructor (e.g. Boolean)",
   "main": "index.js",
-  "dependencies": {
-    "typpy": "2.3.11"
+  "types": "index.d.ts",
+  "exports": {
+    ".": {
+      "require": "./index.js",
+      "import": "./index.mjs"
+    }
   },
+  "dependencies": {},
   "devDependencies": {
-    "browserify": "16.2.3",
-    "chai": "4.2.0",
-    "mocha": "5.2.0",
-    "standard": "12.0.1",
-    "uglify-js": "3.4.9"
+    "esbuild": "^0.17.0",
+    "jest": "^29.5.0",
+    "chai": "^4.3.4",
+    "standard": "12.0.1"
   },
   "scripts": {
-    "test": "npm run mocha && npm run standard",
-    "mocha": "node node_modules/mocha/bin/mocha test/mocha.test.js  ",
+    "test": "jest && npm run standard",
     "standard": "node node_modules/standard/bin/cmd.js || standard",
     "standard:fix": "node node_modules/standard/bin/cmd.js --fix || standard --fix",
-    "browser": "npm run browser:bundle && npm run browser:map && npm run browser:minify",
-    "browser:bundle": "node node_modules/.bin/browserify index.js --standalone autoParse -o dist/auto-parse.js",
-    "browser:map": "node node_modules/.bin/browserify index.js --standalone autoParse -o dist/auto-parse.map.js -d",
-    "browser:minify": "node node_modules/.bin/uglifyjs dist/auto-parse.js -cm > dist/auto-parse.min.js"
+    "build": "node build.js"
   },
   "repository": {
     "type": "git",

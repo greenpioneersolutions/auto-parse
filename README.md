@@ -36,6 +36,11 @@ yarn add auto-parse
 * [#17 Support Instances of Date & Regex Constructors](https://github.com/greenpioneersolutions/auto-parse/issues/17)
 * [#18 Parsing Array Strings Only Works On Double Quotes](https://github.com/greenpioneersolutions/auto-parse/issues/18)
 
+## Roadmap to 2.0
+
+The repository hasn't had a major release in some time. Ideas for a modernized
+**2.0** version are collected in [docs/ROADMAP-2.0.md](docs/ROADMAP-2.0.md).
+
 ## Documentation
 
 ### autoParse(input, type)
@@ -119,6 +124,20 @@ autoParse(qs.parse('?order=asc&orderBy=1')) => { order:'asc', orderBy:1 }
 ```
 - [Check out Run Kit Example](https://runkit.com/greenpioneer/auto-parse)
 - [Check out JS Fiddle Example](https://jsfiddle.net/greenpioneer/4y744xyd/)
+
+### Plugins and ESM usage
+
+auto-parse exposes a simple plugin system and ships an ES module build. TypeScript definitions are included.
+
+```js
+import autoParse from 'auto-parse'
+
+autoParse.use((value) => {
+  if (value === 'special') return 42
+})
+
+autoParse('special') // => 42
+```
 
 #### Other Uses
 
