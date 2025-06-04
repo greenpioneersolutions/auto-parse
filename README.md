@@ -160,6 +160,10 @@ Browser Support
 </script>
 ```
 
+### Publishing to npm
+
+Run `npm run release` to build the project and publish the package to the npm registry.
+
 ## License
 
 The MIT License (MIT)

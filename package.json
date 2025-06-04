@@ -21,7 +21,8 @@
     "test": "jest && npm run standard",
     "standard": "node node_modules/standard/bin/cmd.js || standard",
     "standard:fix": "node node_modules/standard/bin/cmd.js --fix || standard --fix",
-    "build": "node build.js"
+    "build": "node build.js",
+    "release": "npm run build && npm publish"
   },
   "repository": {
     "type": "git",
