@@ -159,6 +159,16 @@ Browser Support
   autoParse('Green Pioneer')
 </script>
 ```
+### Local Examples
+
+Run the example scripts from the `examples` directory:
+
+```bash
+node examples/basic.js
+node examples/plugin.js
+node examples/types.js
+```
+
 
 ### Publishing to npm
 
