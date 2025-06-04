@@ -1,6 +1,6 @@
 module.exports = autoParse
 
-var plugins = []
+const plugins = []
 
 function isType (value, type) {
   if (typeof type === 'string') {
@@ -20,8 +20,8 @@ function isType (value, type) {
 }
 
 function runPlugins (value, type) {
-  for (var i = 0; i < plugins.length; i++) {
-    var res = plugins[i](value, type)
+  for (let i = 0; i < plugins.length; i++) {
+    const res = plugins[i](value, type)
     if (res !== undefined) return res
   }
   return undefined
@@ -87,7 +87,7 @@ function parseObject (value) {
       return autoParse(n)
     })
   } else if (typeof value === 'object' || value.constructor === undefined) {
-    for (var n in value) {
+    for (const n in value) {
       value[n] = autoParse(value[n])
     }
     return value
@@ -115,7 +115,7 @@ function parseFunction (value) {
  *
  */
 function parseType (value, type) {
-  var typeName = type
+  let typeName = type
   /**
    *  Currently they send a string - handle String or Number or Boolean?
    */
@@ -147,7 +147,7 @@ function parseType (value, type) {
     case 'date':
       return new Date(value)
     case 'object':
-      var jsonParsed
+      let jsonParsed
       try {
         jsonParsed = JSON.parse(value)
       } catch (e) {}
@@ -201,14 +201,14 @@ function parseType (value, type) {
  * @return {String|Function|Date|Object|Boolean|Number|Undefined|Null|Array}
  */
 function autoParse (value, type) {
-  var pluginVal = runPlugins(value, type)
+  const pluginVal = runPlugins(value, type)
   if (pluginVal !== undefined) {
     return pluginVal
   }
   if (type) {
     return parseType(value, type)
   }
-  var orignalValue = value
+  const orignalValue = value
   /**
    *  PRE RULE - check for null be cause null can be typeof object which can  through off parsing
    */
@@ -241,7 +241,7 @@ function autoParse (value, type) {
   if (value === 'NaN') {
     return NaN
   }
-  var jsonParsed = null
+  let jsonParsed = null
   try {
     jsonParsed = JSON.parse(value)
   } catch (e) {
@@ -270,11 +270,11 @@ function autoParse (value, type) {
   /**
    * Order Matter because if it is a one or zero boolean will come back with a awnser too. if you want it to be a boolean you must specify
    */
-  var num = Number(value)
+  const num = Number(value)
   if (isType(num, Number)) {
     return num
   }
-  var boo = checkBoolean(value)
+  const boo = checkBoolean(value)
   if (isType(boo, Boolean)) {
     return boo
   }

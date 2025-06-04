@@ -1,5 +1,5 @@
-var autoParse = require('../index.js')
-var chaiAssert = require('chai').assert
+const autoParse = require('../index.js')
+const chaiAssert = require('chai').assert
 
 function Color (inputColor) {
   this.color = inputColor
@@ -118,7 +118,7 @@ describe('Auto Parse', function () {
   })
   describe('Array', function () {
     it(`"['2332','2343','2343','2342','3233']"`, function () {
-      var data = "['2332','2343','2343','2342','3233']"
+      const data = "['2332','2343','2343','2342','3233']"
       chaiAssert.equal(autoParse(data)[0], 2332)
       chaiAssert.typeOf(autoParse(data)[0], 'number')
       chaiAssert.equal(autoParse(data)[1], 2343)
@@ -131,7 +131,7 @@ describe('Auto Parse', function () {
       chaiAssert.typeOf(autoParse(data)[4], 'number')
     })
     it(`'["80", 92, "23", "TruE",false]'`, function () {
-      var data = `'["80", 92, "23", "TruE",false]'`
+      const data = `'["80", 92, "23", "TruE",false]'`
       chaiAssert.equal(autoParse(data)[0], 80)
       chaiAssert.typeOf(autoParse(data)[0], 'number')
       chaiAssert.equal(autoParse(data)[1], 92)
@@ -144,7 +144,7 @@ describe('Auto Parse', function () {
       chaiAssert.typeOf(autoParse(data)[4], 'boolean')
     })
     it(`'["80", 92, "23", "TruE",false]'`, function () {
-      var data = '["80", 92, "23", "TruE",false]'
+      const data = '["80", 92, "23", "TruE",false]'
       chaiAssert.equal(autoParse(data)[0], 80)
       chaiAssert.typeOf(autoParse(data)[0], 'number')
       chaiAssert.equal(autoParse(data)[1], 92)
@@ -157,7 +157,7 @@ describe('Auto Parse', function () {
       chaiAssert.typeOf(autoParse(data)[4], 'boolean')
     })
     it(`"['80', 92, '23', 'TruE',false]"`, function () {
-      var data = "['80', 92, '23', 'TruE',false]"
+      const data = "['80', 92, '23', 'TruE',false]"
       chaiAssert.equal(autoParse(data)[0], 80)
       chaiAssert.typeOf(autoParse(data)[0], 'number')
       chaiAssert.equal(autoParse(data)[1], 92)
@@ -170,7 +170,7 @@ describe('Auto Parse', function () {
       chaiAssert.typeOf(autoParse(data)[4], 'boolean')
     })
     it('`["80", 92, "23", "TruE",false]`', function () {
-      var data = `["80", 92, "23", "TruE", false]`
+      const data = `["80", 92, "23", "TruE", false]`
       chaiAssert.equal(autoParse(data)[0], 80)
       chaiAssert.typeOf(autoParse(data)[0], 'number')
       chaiAssert.equal(autoParse(data)[1], 92)
@@ -183,7 +183,7 @@ describe('Auto Parse', function () {
       chaiAssert.typeOf(autoParse(data)[4], 'boolean')
     })
     it('["80", 92, "23", "TruE",false]', function () {
-      var data = ['80', 92, '23', 'TruE', false]
+      const data = ['80', 92, '23', 'TruE', false]
       chaiAssert.equal(autoParse(data)[0], 80)
       chaiAssert.typeOf(autoParse(data)[0], 'number')
       chaiAssert.equal(autoParse(data)[1], 92)
@@ -197,7 +197,7 @@ describe('Auto Parse', function () {
     })
   })
   describe('Object', function () {
-    var data = {
+    const data = {
       name: 'jason',
       age: '50',
       admin: 'true',
@@ -233,7 +233,7 @@ describe('Auto Parse', function () {
       chaiAssert.equal(autoParse(data).parents[0].age, 75)
     })
     it('parsing Object.create(null) Objects', function () {
-      var value = autoParse(parse({ order: 'asc', orderBy: '1', filterOn: 'true' }))
+      const value = autoParse(parse({ order: 'asc', orderBy: '1', filterOn: 'true' }))
       chaiAssert.deepEqual(value, { order: 'asc', orderBy: 1, filterOn: true })
       chaiAssert.typeOf(value.order, 'string')
       chaiAssert.typeOf(value.orderBy, 'number')
@@ -242,50 +242,50 @@ describe('Auto Parse', function () {
   })
   describe('Date', function () {
     it('new Date', function () {
-      var value = new Date // eslint-disable-line
+      const value = new Date // eslint-disable-line
       chaiAssert.equal(autoParse(value), value)
       chaiAssert.instanceOf(autoParse(value), Date)
     })
     it('new Date()', function () {
-      var value = new Date()
+      const value = new Date()
       chaiAssert.equal(autoParse(value), value)
       chaiAssert.instanceOf(autoParse(value), Date)
     })
     it('new Date()', function () {
-      var value = new Date('1989-12-01')
+      const value = new Date('1989-12-01')
       chaiAssert.deepEqual(autoParse(value), value)
       chaiAssert.instanceOf(autoParse(value), Date)
     })
   })
   describe('Regex', function () {
     it('/\w+/', function () { // eslint-disable-line 
-      var regex1 = /\w+/
+      const regex1 = /\w+/
       chaiAssert.equal(autoParse(regex1), regex1)
       chaiAssert.instanceOf(autoParse(regex1), RegExp)
     })
     it('new RegExp("\\w+")', function () {
-      var regex2 = new RegExp('\\w+')
+      const regex2 = new RegExp('\\w+')
       chaiAssert.equal(autoParse(regex2), regex2)
       chaiAssert.instanceOf(autoParse(regex2), RegExp)
     })
   })
   describe('Function', function () {
     it('return "9" to 9', function () {
-      var data = function () {
+      const data = function () {
         return '9'
       }
       chaiAssert.equal(autoParse(data), 9)
       chaiAssert.typeOf(autoParse(data), 'number')
     })
     it('return "jason" to "jason"', function () {
-      var data = function () {
+      const data = function () {
         return 'jason'
       }
       chaiAssert.equal(autoParse(data), 'jason')
       chaiAssert.typeOf(autoParse(data), 'string')
     })
     it('return "true" to true', function () {
-      var data = function () {
+      const data = function () {
         return 'true'
       }
       chaiAssert.equal(autoParse(data), true)
@@ -378,7 +378,7 @@ describe('Auto Parse', function () {
       chaiAssert.instanceOf(autoParse('1989-12-01', 'date'), Date)
     })
     it('* to String', function () {
-      var data = function () {
+      const data = function () {
         return '9'
       }
       chaiAssert.equal(autoParse(1234, String), '1234')
@@ -391,13 +391,13 @@ describe('Auto Parse', function () {
       chaiAssert.equal(autoParse(data, 'String'), 'function () {\n        return \'9\';\n      }')
     })
     it('function to function', function () {
-      var data = function () {
+      const data = function () {
         return '9'
       }
       chaiAssert.equal(autoParse(data, 'function'), data)
     })
     it('* to object', function () {
-      var data = {
+      const data = {
         name: 'jason',
         age: '50',
         admin: 'true',
