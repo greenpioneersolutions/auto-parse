@@ -9,11 +9,14 @@ A small utility that automatically converts strings and other values into the mo
 
 ## Features
 
-- Parses numbers, booleans, objects, arrays and more
-- Understands modern types like `BigInt` and `Symbol`
-- Plugin system for custom parsing logic
-- Works in browsers and Node.js
-- Ships with ESM support and `.d.ts` definitions
+- Converts strings to numbers, booleans, objects, arrays and more
+- Handles modern types like `BigInt` and `Symbol`
+- Supports comma-separated numbers and leading-zero preservation
+- Can strip prefix characters before parsing
+- Restricts output types via `allowedTypes`
+- Extensible plugin system for custom logic
+- Works in browsers and Node.js with ESM and CommonJS builds
+- Includes TypeScript definitions
 
 ## Installation
 
