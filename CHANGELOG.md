@@ -8,7 +8,7 @@
 - Plugin API via `autoParse.use`
 - Tests run on GitHub Actions with Jest
 
-## 2.0.1 (Unreleased)
+## 2.0.1 (2025-06-05)
 
 - Add `preserveLeadingZeros` option to keep numeric strings like `"0004"` from
   being converted to numbers.
