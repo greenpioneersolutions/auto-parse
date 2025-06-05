@@ -1,6 +1,35 @@
 module.exports = autoParse
 
-var typpy = require('typpy')
+const plugins = []
+
+function isType (value, type) {
+  if (typeof type === 'string') {
+    if (type.toLowerCase() === 'array') return Array.isArray(value)
+    if (type.toLowerCase() === 'null') return value === null
+    if (type.toLowerCase() === 'undefined') return value === undefined
+    // eslint-disable-next-line valid-typeof
+    return typeof value === type.toLowerCase()
+  }
+  if (type === Array) return Array.isArray(value)
+  if (type === Number) return typeof value === 'number' && !Number.isNaN(value)
+  if (type === String) return typeof value === 'string'
+  if (type === Boolean) return typeof value === 'boolean'
+  if (type === Object) return typeof value === 'object' && value !== null && !Array.isArray(value)
+  if (type === null) return value === null
+  return value instanceof type
+}
+
+function runPlugins (value, type) {
+  for (let i = 0; i < plugins.length; i++) {
+    const res = plugins[i](value, type)
+    if (res !== undefined) return res
+  }
+  return undefined
+}
+
+autoParse.use = function (fn) {
+  if (typeof fn === 'function') plugins.push(fn)
+}
 
 /**
  *
@@ -53,12 +82,12 @@ function checkBoolean (value) {
  *
  */
 function parseObject (value) {
-  if (typpy(value, Array)) {
+  if (Array.isArray(value)) {
     return value.map(function (n, key) {
       return autoParse(n)
     })
-  } else if (typpy(value, Object) || value.constructor === undefined) {
-    for (var n in value) {
+  } else if (typeof value === 'object' || value.constructor === undefined) {
+    for (const n in value) {
       value[n] = autoParse(value[n])
     }
     return value
@@ -86,13 +115,13 @@ function parseFunction (value) {
  *
  */
 function parseType (value, type) {
+  let typeName = type
   /**
    *  Currently they send a string - handle String or Number or Boolean?
    */
-  if ((value && value.constructor === type) || typpy(value, type)) {
+  if ((value && value.constructor === type) || (isType(value, type) && typeName !== 'object' && typeName !== 'array')) {
     return value
   }
-  var typeName = type
   /**
    * Convert the constructor into a string
    */
@@ -106,7 +135,7 @@ function parseType (value, type) {
       if (typeof value === 'object') return JSON.stringify(value)
       return String(value)
     case 'function':
-      if (typpy(value, Function)) {
+      if (isType(value, Function)) {
         return value
       }
       return function (cb) {
@@ -118,13 +147,13 @@ function parseType (value, type) {
     case 'date':
       return new Date(value)
     case 'object':
-      var jsonParsed
+      let jsonParsed
       try {
         jsonParsed = JSON.parse(value)
       } catch (e) {}
-      if (typpy(jsonParsed, Object) || typpy(jsonParsed, Array)) {
+      if (isType(jsonParsed, Object) || isType(jsonParsed, Array)) {
         return autoParse(jsonParsed)
-      } else if (!typpy(jsonParsed, 'undefined')) {
+      } else if (!isType(jsonParsed, 'undefined')) {
         return {}
       }
       return parseObject(value)
@@ -132,6 +161,10 @@ function parseType (value, type) {
       return toBoolean(value)
     case 'number':
       return Number(value)
+    case 'bigint':
+      return BigInt(value)
+    case 'symbol':
+      return Symbol(value)
     case 'undefined':
       return undefined
     case 'null':
@@ -168,10 +201,14 @@ function parseType (value, type) {
  * @return {String|Function|Date|Object|Boolean|Number|Undefined|Null|Array}
  */
 function autoParse (value, type) {
+  const pluginVal = runPlugins(value, type)
+  if (pluginVal !== undefined) {
+    return pluginVal
+  }
   if (type) {
     return parseType(value, type)
   }
-  var orignalValue = value
+  const orignalValue = value
   /**
    *  PRE RULE - check for null be cause null can be typeof object which can  through off parsing
    */
@@ -188,7 +225,8 @@ function autoParse (value, type) {
   if (value instanceof Date || value instanceof RegExp) {
     return value
   }
-  if (typeof value === 'number' || typeof value === 'boolean') {
+  // eslint-disable-next-line valid-typeof
+  if (typeof value === 'number' || typeof value === 'boolean' || typeof value === 'bigint' || typeof value === 'symbol') {
     return value
   }
   if (typeof value === 'function') {
@@ -203,7 +241,7 @@ function autoParse (value, type) {
   if (value === 'NaN') {
     return NaN
   }
-  var jsonParsed = null
+  let jsonParsed = null
   try {
     jsonParsed = JSON.parse(value)
   } catch (e) {
@@ -232,12 +270,12 @@ function autoParse (value, type) {
   /**
    * Order Matter because if it is a one or zero boolean will come back with a awnser too. if you want it to be a boolean you must specify
    */
-  var num = Number(value)
-  if (typpy(num, Number)) {
+  const num = Number(value)
+  if (isType(num, Number)) {
     return num
   }
-  var boo = checkBoolean(value)
-  if (typpy(boo, Boolean)) {
+  const boo = checkBoolean(value)
+  if (isType(boo, Boolean)) {
     return boo
   }
   /**
