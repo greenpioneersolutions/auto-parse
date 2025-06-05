@@ -31,6 +31,11 @@ const autoParse = require('auto-parse')
 autoParse('42')        // => 42
 autoParse('TrUe')      // => true
 autoParse('{"a":1}') // => { a: 1 }
+autoParse('0005')      // => 5
+autoParse('0005', undefined, { preserveLeadingZeros: true }) // => '0005'
+autoParse('#42', undefined, { stripStartChars: '#' }) // => 42
+autoParse('42', undefined, { allowedTypes: ['string'] }) // => '42'
+autoParse('385,134', undefined, { parseCommaNumbers: true }) // => 385134
 ```
 
 ### ES module usage
@@ -58,16 +63,26 @@ More examples can be found in the [`examples/`](examples) directory.
 
 ## API
 
-`autoParse(value, [type])`
+`autoParse(value, [type], [options])`
 
 - **value** – the value to parse
 - **type** *(optional)* – a constructor or string name to force the output type
 
-`autoParse.use(fn)` – register a plugin. The function receives `(value, type)` and should return `undefined` to skip or the parsed value.
+`autoParse.use(fn)` – register a plugin. The function receives `(value, type, options)` and should return `undefined` to skip or the parsed value.
 
-## Roadmap
+**options**
 
-Plans for a future 2.0 release are tracked in [docs/ROADMAP-2.0.md](docs/ROADMAP-2.0.md).
+- `preserveLeadingZeros` – when `true`, numeric strings like `'0004'` remain strings instead of being converted to numbers.
+- `allowedTypes` – array of type names that the result is allowed to be. If the parsed value is not one of these types, the original value is returned.
+- `stripStartChars` – characters to remove from the beginning of input strings before parsing.
+- `parseCommaNumbers` – when `true`, strings with comma separators are converted to numbers.
+
+## Release Notes
+
+Version 2.0 modernizes the project with an esbuild-powered build, ESM support,
+TypeScript definitions and a plugin API. It also adds parsing for `BigInt` and
+`Symbol` values. See [docs/RELEASE_NOTES_2.0.md](docs/RELEASE_NOTES_2.0.md) and
+[CHANGELOG.md](CHANGELOG.md) for the full list of changes.
 
 ## Contributing
 

@@ -1,6 +1,6 @@
 # Roadmap to 2.0
 
-This document tracks ideas for a potential 2.0 release of **auto-parse**.
+The following items were completed as part of the **auto-parse** 2.0 release.
 
 - **Modernize tooling** – replace the Browserify/Uglify build with a modern bundler such as Rollup or esbuild and update development dependencies.
 - **Add TypeScript support** – ship type declarations or rewrite the library in TypeScript.
@@ -12,3 +12,5 @@ This document tracks ideas for a potential 2.0 release of **auto-parse**.
 - **Documentation updates** – maintain a CHANGELOG and provide migration notes for breaking changes.
 
 These enhancements would modernize the project and make the upgrade to version 2.0 compelling for users.
+
+See [RELEASE_NOTES_2.0.md](RELEASE_NOTES_2.0.md) for an overview of the changes shipped in this release.

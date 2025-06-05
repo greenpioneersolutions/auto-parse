@@ -77,6 +77,38 @@ describe('Auto Parse', function () {
       chaiAssert.equal(autoParse('0'), 0)
       chaiAssert.typeOf(autoParse('0'), 'number')
     })
+    it('preserves leading zeros when requested', function () {
+      chaiAssert.equal(
+        autoParse('0000035', undefined, { preserveLeadingZeros: true }),
+        '0000035'
+      )
+      chaiAssert.typeOf(
+        autoParse('0000035', undefined, { preserveLeadingZeros: true }),
+        'string'
+      )
+    })
+    it('respects allowedTypes option', function () {
+      chaiAssert.equal(
+        autoParse('42', undefined, { allowedTypes: ['string'] }),
+        '42'
+      )
+      chaiAssert.typeOf(
+        autoParse('42', undefined, { allowedTypes: ['string'] }),
+        'string'
+      )
+    })
+    it('strips starting characters before parsing', function () {
+      chaiAssert.equal(
+        autoParse('#123', undefined, { stripStartChars: '#' }),
+        123
+      )
+    })
+    it('parses numbers with commas when enabled', function () {
+      chaiAssert.equal(
+        autoParse('385,134', undefined, { parseCommaNumbers: true }),
+        385134
+      )
+    })
     it('26 Number to Number', function () {
       chaiAssert.equal(autoParse(26), 26)
       chaiAssert.typeOf(autoParse(26), 'number')
