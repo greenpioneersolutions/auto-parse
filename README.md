@@ -59,6 +59,17 @@ autoParse.use(value => {
 autoParse('color:red') // => { color: '#FF0000' }
 ```
 
+### Options
+
+Use the third `options` argument to fine‑tune parsing behavior:
+
+```js
+autoParse('0005', undefined, { preserveLeadingZeros: true }) // => '0005'
+autoParse('42', undefined, { allowedTypes: ['string'] })     // => '42'
+autoParse("'5", undefined, { stripStartChars: "'" })         // => 5
+autoParse('385,134', undefined, { parseCommaNumbers: true }) // => 385134
+```
+
 More examples can be found in the [`examples/`](examples) directory.
 
 ## API
