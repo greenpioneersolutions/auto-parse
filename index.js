@@ -19,12 +19,34 @@ function isType (value, type) {
   return value instanceof type
 }
 
-function runPlugins (value, type) {
+function runPlugins (value, type, options) {
   for (let i = 0; i < plugins.length; i++) {
-    const res = plugins[i](value, type)
+    const res = plugins[i](value, type, options)
     if (res !== undefined) return res
   }
   return undefined
+}
+
+function getTypeName (value) {
+  if (value === null) return 'null'
+  if (Array.isArray(value)) return 'array'
+  if (value instanceof Date) return 'date'
+  if (value instanceof RegExp) return 'regexp'
+  // eslint-disable-next-line valid-typeof
+  if (typeof value === 'bigint') return 'bigint'
+  // eslint-disable-next-line valid-typeof
+  if (typeof value === 'symbol') return 'symbol'
+  return typeof value
+}
+
+function returnIfAllowed (val, options, fallback) {
+  if (options && Array.isArray(options.allowedTypes)) {
+    const type = getTypeName(val)
+    if (!options.allowedTypes.includes(type)) {
+      return fallback
+    }
+  }
+  return val
 }
 
 autoParse.use = function (fn) {
@@ -39,7 +61,15 @@ autoParse.use = function (fn) {
  * @return {Value} parsed string
  *
  */
-function stripTrimLower (value) {
+function stripTrimLower (value, options = {}) {
+  if (options.stripStartChars && typeof value === 'string') {
+    const chars = Array.isArray(options.stripStartChars)
+      ? options.stripStartChars.join('')
+      : String(options.stripStartChars)
+    const escaped = chars.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    const re = new RegExp('^[' + escaped + ']+')
+    value = value.replace(re, '')
+  }
   return value.replace(/[""'']/ig, '').trim().toLowerCase()
 }
 /**
@@ -50,8 +80,8 @@ function stripTrimLower (value) {
  * @return {Boolean} parsed boolean
  *
  */
-function toBoolean (value) {
-  return checkBoolean(value) || false
+function toBoolean (value, options) {
+  return checkBoolean(value, options) || false
 }
 /**
  *
@@ -61,14 +91,14 @@ function toBoolean (value) {
  * @return {Boolean} is a boolean value
  *
  */
-function checkBoolean (value) {
+function checkBoolean (value, options) {
   if (!value) {
     return false
   }
   if (typeof value === 'number' || typeof value === 'boolean') {
     return !!value
   }
-  value = stripTrimLower(value)
+  value = stripTrimLower(value, options)
   if (value === 'true' || value === '1') return true
   if (value === 'false' || value === '0') return false
   return null
@@ -81,14 +111,14 @@ function checkBoolean (value) {
  * @return {Value} parsed object
  *
  */
-function parseObject (value) {
+function parseObject (value, options) {
   if (Array.isArray(value)) {
     return value.map(function (n, key) {
-      return autoParse(n)
+      return autoParse(n, undefined, options)
     })
   } else if (typeof value === 'object' || value.constructor === undefined) {
     for (const n in value) {
-      value[n] = autoParse(value[n])
+      value[n] = autoParse(value[n], undefined, options)
     }
     return value
   }
@@ -102,8 +132,8 @@ function parseObject (value) {
  * @return {Value} returned value from the called value function
  *
  */
-function parseFunction (value) {
-  return autoParse(value())
+function parseFunction (value, options) {
+  return autoParse(value(), undefined, options)
 }
 /**
  *
@@ -114,7 +144,7 @@ function parseFunction (value) {
  * @return {Value} parsed type
  *
  */
-function parseType (value, type) {
+function parseType (value, type, options = {}) {
   let typeName = type
   /**
    *  Currently they send a string - handle String or Number or Boolean?
@@ -152,14 +182,18 @@ function parseType (value, type) {
         jsonParsed = JSON.parse(value)
       } catch (e) {}
       if (isType(jsonParsed, Object) || isType(jsonParsed, Array)) {
-        return autoParse(jsonParsed)
+        return autoParse(jsonParsed, undefined, options)
       } else if (!isType(jsonParsed, 'undefined')) {
         return {}
       }
-      return parseObject(value)
+      return parseObject(value, options)
     case 'boolean':
-      return toBoolean(value)
+      return toBoolean(value, options)
     case 'number':
+      if (options.parseCommaNumbers && typeof value === 'string') {
+        const normalized = value.replace(/,/g, '')
+        if (!Number.isNaN(Number(normalized))) return Number(normalized)
+      }
       return Number(value)
     case 'bigint':
       return BigInt(value)
@@ -200,46 +234,54 @@ function parseType (value, type) {
  * @param {Constructor|String} target The target type.
  * @return {String|Function|Date|Object|Boolean|Number|Undefined|Null|Array}
  */
-function autoParse (value, type) {
-  const pluginVal = runPlugins(value, type)
+function autoParse (value, type, options = {}) {
+  const pluginVal = runPlugins(value, type, options)
   if (pluginVal !== undefined) {
-    return pluginVal
+    return returnIfAllowed(pluginVal, options, value)
   }
   if (type) {
-    return parseType(value, type)
+    return returnIfAllowed(parseType(value, type, options), options, value)
   }
   const orignalValue = value
+  if (typeof value === 'string' && options.stripStartChars) {
+    const chars = Array.isArray(options.stripStartChars)
+      ? options.stripStartChars.join('')
+      : String(options.stripStartChars)
+    const escaped = chars.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    const re = new RegExp('^[' + escaped + ']+')
+    value = value.replace(re, '')
+  }
   /**
    *  PRE RULE - check for null be cause null can be typeof object which can  through off parsing
    */
   if (value === null) {
-    return null
+    return returnIfAllowed(null, options, orignalValue)
   }
   /**
    * TYPEOF SECTION - Use to check and do specific things based off of know the type
    * Check against undefined
    */
   if (value === void 0) {
-    return undefined
+    return returnIfAllowed(undefined, options, orignalValue)
   }
   if (value instanceof Date || value instanceof RegExp) {
-    return value
+    return returnIfAllowed(value, options, orignalValue)
   }
   // eslint-disable-next-line valid-typeof
   if (typeof value === 'number' || typeof value === 'boolean' || typeof value === 'bigint' || typeof value === 'symbol') {
-    return value
+    return returnIfAllowed(value, options, orignalValue)
   }
   if (typeof value === 'function') {
-    return parseFunction(value)
+    return returnIfAllowed(parseFunction(value, options), options, orignalValue)
   }
   if (typeof value === 'object') {
-    return parseObject(value)
+    return returnIfAllowed(parseObject(value, options), options, orignalValue)
   }
   /**
    * STRING SECTION - If we made it this far that means it is a string that we must do something with to parse
    */
   if (value === 'NaN') {
-    return NaN
+    return returnIfAllowed(NaN, options, orignalValue)
   }
   let jsonParsed = null
   try {
@@ -258,29 +300,39 @@ function autoParse (value, type) {
     }
   }
   if (jsonParsed && typeof jsonParsed === 'object') {
-    return autoParse(jsonParsed)
+    return returnIfAllowed(autoParse(jsonParsed, undefined, options), options, orignalValue)
   }
-  value = stripTrimLower(value)
+  value = stripTrimLower(value, options)
   if (value === 'undefined' || value === '') {
-    return undefined
+    return returnIfAllowed(undefined, options, orignalValue)
   }
   if (value === 'null') {
-    return null
+    return returnIfAllowed(null, options, orignalValue)
   }
   /**
    * Order Matter because if it is a one or zero boolean will come back with a awnser too. if you want it to be a boolean you must specify
    */
-  const num = Number(value)
-  if (isType(num, Number)) {
-    return num
+  let numValue = value
+  if (options.parseCommaNumbers && typeof numValue === 'string' && numValue.includes(',')) {
+    const normalized = numValue.replace(/,/g, '')
+    if (!Number.isNaN(Number(normalized))) {
+      numValue = normalized
+    }
   }
-  const boo = checkBoolean(value)
+  const num = Number(numValue)
+  if (isType(num, Number)) {
+    if (options.preserveLeadingZeros && /^0+\d+$/.test(value)) {
+      return returnIfAllowed(String(orignalValue), options, orignalValue)
+    }
+    return returnIfAllowed(num, options, orignalValue)
+  }
+  const boo = checkBoolean(value, options)
   if (isType(boo, Boolean)) {
-    return boo
+    return returnIfAllowed(boo, options, orignalValue)
   }
   /**
    * DEFAULT SECTION - bascially if we catch nothing we assume that you just have a string
    */
   // if string - convert to ""
-  return String(orignalValue)
+  return returnIfAllowed(String(orignalValue), options, orignalValue)
 }
