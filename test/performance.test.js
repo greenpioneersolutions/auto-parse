@@ -127,6 +127,5 @@ describe('Performance', () => {
     })
     console.log('plugin parse time', time)
     expect(time).toBeLessThan(65)
-
   })
 })
