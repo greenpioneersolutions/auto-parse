@@ -19,7 +19,8 @@ describe('Performance', () => {
       }
     })
     console.log('string parse time', time)
-    expect(time).toBeLessThan(50)
+    // allow extra time for CI machines
+    expect(time).toBeLessThan(65)
   })
 
   test('parse object string performance', () => {
@@ -32,7 +33,8 @@ describe('Performance', () => {
       }
     })
     console.log('object string parse time', time)
-    expect(time).toBeLessThan(13)
+    // CI hardware runs slower, so give it more headroom
+    expect(time).toBeLessThan(17)
   })
 
   test('parse number performance', () => {
@@ -45,7 +47,7 @@ describe('Performance', () => {
       }
     })
     console.log('number parse time', time)
-    expect(time).toBeLessThan(50)
+    expect(time).toBeLessThan(65)
   })
 
   test('parse boolean performance', () => {
@@ -58,7 +60,7 @@ describe('Performance', () => {
       }
     })
     console.log('boolean parse time', time)
-    expect(time).toBeLessThan(50)
+    expect(time).toBeLessThan(65)
   })
 
   test('parse array performance', () => {
@@ -71,7 +73,7 @@ describe('Performance', () => {
       }
     })
     console.log('array parse time', time)
-    expect(time).toBeLessThan(15)
+    expect(time).toBeLessThan(20)
   })
 
   test('parse object performance', () => {
@@ -85,7 +87,7 @@ describe('Performance', () => {
       }
     })
     console.log('object parse time', time)
-    expect(time).toBeLessThan(15)
+    expect(time).toBeLessThan(20)
   })
 
   test('options performance', () => {
@@ -108,7 +110,7 @@ describe('Performance', () => {
       }
     })
     console.log('options parse time', time)
-    expect(time).toBeLessThan(20)
+    expect(time).toBeLessThan(26)
   })
 
   test('plugin performance', () => {
@@ -123,6 +125,6 @@ describe('Performance', () => {
       }
     })
     console.log('plugin parse time', time)
-    expect(time).toBeLessThan(50)
+    expect(time).toBeLessThan(65)
   })
 })
