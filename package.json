@@ -1,6 +1,6 @@
 {
   "name": "auto-parse",
-  "version": "2.0.2",
+  "version": "2.1.0",
   "description": "Automatically convert any value to its best matching JavaScript type. Supports numbers, booleans, objects, arrays, BigInt, Symbol, comma-separated numbers, prefix stripping, allowed type enforcement and a plugin API.",
   "main": "index.js",
   "types": "index.d.ts",
@@ -107,6 +107,7 @@
       "before"
       , "BigInt"
       , "Symbol"
+      , "globalThis"
     ],
     "ignore": [
       "dist/"

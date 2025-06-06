@@ -1,5 +1,14 @@
 # Changelog
 
+## 2.1.0 (2025-06-07)
+
+- Currency, percent, unit and range string parsing (built-in support for 10 common currencies, extendable via `currencySymbols`)
+- Yes/No and On/Off boolean synonyms
+- Map, Set and typed array support
+- Simple math expression evaluation
+- Optional env variable expansion and function-string parsing
+- Advanced features must be enabled individually via options
+
 ## 2.0.0 (2025-06-05)
 
 - Modern build powered by esbuild
