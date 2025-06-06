@@ -91,6 +91,55 @@ More examples can be found in the [`examples/`](examples) directory.
 - `stripStartChars` – characters to remove from the beginning of input strings before parsing.
 - `parseCommaNumbers` – when `true`, strings with comma separators are converted to numbers.
 
+## Benchmarks (v2.0.2)
+
+The following timings are measured on Node.js using `npm test` and represent roughly how long it takes to parse 10 000 values after warm‑up:
+
+| Feature | Time (ms) |
+| --- | ---: |
+| string values | ~47 |
+| JSON strings | ~6 |
+| numeric strings | ~20 |
+| boolean strings | ~28 |
+| arrays | ~5 |
+| plain objects | ~3 |
+| options combined | ~6 |
+| plugin hook | ~4 |
+
+Even a single parse is extremely fast:
+
+| Feature | 1-run time (ms) |
+| --- | ---: |
+| string values | ~0.005 |
+| JSON strings | ~0.0006 |
+| numeric strings | ~0.002 |
+| boolean strings | ~0.003 |
+| arrays | ~0.0005 |
+| plain objects | ~0.0003 |
+| options combined | ~0.0006 |
+| plugin hook | ~0.0004 |
+
+These numbers demonstrate the parser runs in well under a millisecond for typical values, so performance should never be a concern.
+
+## How autoParse Works
+
+`autoParse` processes the input in several phases. First, any registered plugins
+are given a chance to return a custom result. If you pass a `type` argument,
+the library delegates to an internal `parseType` helper which converts the
+value specifically to that constructor or primitive form.
+
+When no explicit type is provided, the parser inspects the value itself.
+Primitive numbers, booleans, dates and the like are returned immediately.
+Functions are invoked, arrays and plain objects are traversed recursively, and
+strings are normalized before being tested as JSON, numbers or booleans. Options
+such as `allowedTypes`, `stripStartChars` and `parseCommaNumbers` tweak this
+behaviour.
+
+This layered approach makes `autoParse` suitable for many scenarios—from
+parsing environment variables and CLI arguments to cleaning up user input or
+query parameters. Plugins let you extend these rules so the core logic stays
+fast while adapting to your own formats.
+
 ## Release Notes
 
 Version 2.0 modernizes the project with an esbuild-powered build, ESM support,

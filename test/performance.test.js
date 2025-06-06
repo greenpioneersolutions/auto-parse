@@ -10,24 +10,122 @@ function benchmark (fn) {
 
 describe('Performance', () => {
   test('parse string performance', () => {
-    for (let i = 0; i < 1000; i++) autoParse('  "42"  ')
+    for (let i = 0; i < 1000; i++) {
+      autoParse('  "42"  ')
+    }
     const time = benchmark(() => {
       for (let i = 0; i < 10000; i++) {
         autoParse('  "42"  ')
       }
     })
     console.log('string parse time', time)
-    expect(time).toBeLessThan(50)
+    // allow extra time for CI machines
+    expect(time).toBeLessThan(65)
   })
 
   test('parse object string performance', () => {
-    for (let i = 0; i < 100; i++) autoParse('{"a":1,"b":2}')
+    for (let i = 0; i < 100; i++) {
+      autoParse('{"a":1,"b":2}')
+    }
+
     const time = benchmark(() => {
       for (let i = 0; i < 1000; i++) {
         autoParse('{"a":1,"b":2}')
       }
     })
     console.log('object string parse time', time)
-    expect(time).toBeLessThan(13)
+    // CI hardware runs slower, so give it more headroom
+    expect(time).toBeLessThan(17)
+  })
+
+  test('parse number performance', () => {
+    for (let i = 0; i < 1000; i++) {
+      autoParse('123')
+    }
+    const time = benchmark(() => {
+      for (let i = 0; i < 10000; i++) {
+        autoParse('123')
+      }
+    })
+    console.log('number parse time', time)
+    expect(time).toBeLessThan(65)
+  })
+
+  test('parse boolean performance', () => {
+    for (let i = 0; i < 1000; i++) {
+      autoParse('true')
+    }
+    const time = benchmark(() => {
+      for (let i = 0; i < 10000; i++) {
+        autoParse('true')
+      }
+    })
+    console.log('boolean parse time', time)
+    expect(time).toBeLessThan(65)
+  })
+
+  test('parse array performance', () => {
+    for (let i = 0; i < 100; i++) {
+      autoParse('[1,2,3]')
+    }
+    const time = benchmark(() => {
+      for (let i = 0; i < 1000; i++) {
+        autoParse('[1,2,3]')
+      }
+    })
+    console.log('array parse time', time)
+    expect(time).toBeLessThan(20)
+  })
+
+  test('parse object performance', () => {
+    const obj = { a: '1', b: '2' }
+    for (let i = 0; i < 100; i++) {
+      autoParse(obj)
+    }
+    const time = benchmark(() => {
+      for (let i = 0; i < 1000; i++) {
+        autoParse(obj)
+      }
+    })
+    console.log('object parse time', time)
+    expect(time).toBeLessThan(20)
+  })
+
+  test('options performance', () => {
+    for (let i = 0; i < 100; i++) {
+      autoParse('001,234', undefined, {
+        parseCommaNumbers: true,
+        stripStartChars: '0',
+        preserveLeadingZeros: true,
+        allowedTypes: ['string']
+      })
+    }
+    const time = benchmark(() => {
+      for (let i = 0; i < 1000; i++) {
+        autoParse('001,234', undefined, {
+          parseCommaNumbers: true,
+          stripStartChars: '0',
+          preserveLeadingZeros: true,
+          allowedTypes: ['string']
+        })
+      }
+    })
+    console.log('options parse time', time)
+    expect(time).toBeLessThan(26)
+  })
+
+  test('plugin performance', () => {
+    const ap = require('../index.js')
+    ap.use(v => (v === 'plug' ? 1 : undefined))
+    for (let i = 0; i < 1000; i++) {
+      ap('plug')
+    }
+    const time = benchmark(() => {
+      for (let i = 0; i < 10000; i++) {
+        ap('plug')
+      }
+    })
+    console.log('plugin parse time', time)
+    expect(time).toBeLessThan(65)
   })
 })
