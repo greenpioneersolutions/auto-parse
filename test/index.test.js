@@ -79,35 +79,73 @@ describe('Auto Parse', function () {
     })
     it('preserves leading zeros when requested', function () {
       chaiAssert.equal(
-        autoParse('0000035', undefined, { preserveLeadingZeros: true }),
+        autoParse('0000035', { preserveLeadingZeros: true }),
         '0000035'
       )
       chaiAssert.typeOf(
-        autoParse('0000035', undefined, { preserveLeadingZeros: true }),
+        autoParse('0000035', { preserveLeadingZeros: true }),
         'string'
       )
     })
     it('respects allowedTypes option', function () {
       chaiAssert.equal(
-        autoParse('42', undefined, { allowedTypes: ['string'] }),
+        autoParse('42', { allowedTypes: ['string'] }),
         '42'
       )
       chaiAssert.typeOf(
-        autoParse('42', undefined, { allowedTypes: ['string'] }),
+        autoParse('42', { allowedTypes: ['string'] }),
         'string'
       )
     })
+    it('allows numbers when included in allowedTypes', function () {
+      chaiAssert.strictEqual(autoParse('42', { allowedTypes: ['number'] }), 42)
+      chaiAssert.typeOf(autoParse('42', { allowedTypes: ['number'] }), 'number')
+    })
+    it('returns original when parsed type not allowed', function () {
+      chaiAssert.strictEqual(autoParse('true', { allowedTypes: ['number'] }), 'true')
+    })
+    it('supports arrays and objects in allowedTypes', function () {
+      chaiAssert.deepEqual(autoParse('[1,2]', { allowedTypes: ['array'] }), [1, 2])
+      chaiAssert.deepEqual(autoParse('{"a":1}', { allowedTypes: ['object'] }), { a: 1 })
+    })
     it('strips starting characters before parsing', function () {
       chaiAssert.equal(
-        autoParse('#123', undefined, { stripStartChars: '#' }),
+        autoParse('#123', { stripStartChars: '#' }),
         123
+      )
+    })
+    it('strips multiple characters', function () {
+      chaiAssert.equal(autoParse('$$$7', { stripStartChars: '$' }), 7)
+      chaiAssert.equal(autoParse("'42", { stripStartChars: "'" }), 42)
+    })
+    it('strips from a set of characters', function () {
+      chaiAssert.equal(
+        autoParse('@@100', { stripStartChars: ['@', '#'] }),
+        100
+      )
+      chaiAssert.equal(
+        autoParse('#@50', { stripStartChars: ['@', '#'] }),
+        50
       )
     })
     it('parses numbers with commas when enabled', function () {
       chaiAssert.equal(
-        autoParse('385,134', undefined, { parseCommaNumbers: true }),
+        autoParse('385,134', { parseCommaNumbers: true }),
         385134
       )
+    })
+    it('handles multi-comma numbers', function () {
+      chaiAssert.equal(
+        autoParse('1,234,567', { parseCommaNumbers: true }),
+        1234567
+      )
+      chaiAssert.equal(
+        autoParse('10,000,000.01', { parseCommaNumbers: true }),
+        10000000.01
+      )
+    })
+    it('ignores comma parsing when disabled', function () {
+      chaiAssert.strictEqual(autoParse('1,234,567'), '1,234,567')
     })
     it('26 Number to Number', function () {
       chaiAssert.equal(autoParse(26), 26)

@@ -17,6 +17,17 @@ A small utility that automatically converts strings and other values into the mo
 - Extensible plugin system for custom logic
 - Works in browsers and Node.js with ESM and CommonJS builds
 - Includes TypeScript definitions
+- Parses currency strings (USD, EUR, GBP, JPY, AUD, CAD, CHF, HKD, INR and KRW built in – extend via `currencySymbols`)
+- Interprets percentages like `85%`
+- Detects common units such as `10px` or `3kg`
+- Expands ranges like `1..5` or `1-5`
+- Understands `yes`/`no` and `on`/`off` booleans
+- Converts `Map:` and `Set:` strings into real objects
+- Supports typed arrays
+- Evaluates simple math expressions
+- Optional environment variable expansion
+- Optional function-string parsing
+- Advanced features are disabled by default and can be enabled individually
 
 ## Installation
 
@@ -39,6 +50,20 @@ autoParse('0005', undefined, { preserveLeadingZeros: true }) // => '0005'
 autoParse('#42', undefined, { stripStartChars: '#' }) // => 42
 autoParse('42', undefined, { allowedTypes: ['string'] }) // => '42'
 autoParse('385,134', undefined, { parseCommaNumbers: true }) // => 385134
+autoParse('$9.99', { parseCurrency: true })  // => 9.99
+autoParse('10px', { parseUnits: true })      // => { value: 10, unit: 'px' }
+autoParse('1..3', { parseRanges: true })     // => [1, 2, 3]
+autoParse('r$5', { parseCurrency: true, currencySymbols: { 'r$': 'BRL' } }) // => 5
+autoParse('\u20BA7', { parseCurrency: true, currencySymbols: { '\u20BA': 'TRY' }, currencyAsObject: true }) // => { value: 7, currency: 'TRY' }
+autoParse('85%', { parsePercent: true })     // => 0.85
+autoParse('yes', { booleanSynonyms: true })  // => true
+autoParse('Map:[["a",1]]', { parseMapSets: true }).get('a') // => 1
+autoParse('Uint8Array[1,2]', { parseTypedArrays: true })[0] // => 1
+autoParse('2 + 3 * 4', { parseExpressions: true }) // => 14
+process.env.TEST_ENV = '123'
+autoParse('$TEST_ENV', { expandEnv: true }) // => 123
+const double = autoParse('x => x * 2', { parseFunctionStrings: true })
+double(3) // => 6
 ```
 
 ### ES module usage
@@ -90,8 +115,17 @@ More examples can be found in the [`examples/`](examples) directory.
 - `allowedTypes` – array of type names that the result is allowed to be. If the parsed value is not one of these types, the original value is returned.
 - `stripStartChars` – characters to remove from the beginning of input strings before parsing.
 - `parseCommaNumbers` – when `true`, strings with comma separators are converted to numbers.
+- `parseCurrency` – enable currency string recognition.
+- `parsePercent` – enable percent string recognition.
+- `parseUnits` – enable unit string parsing.
+- `parseRanges` – enable range string parsing.
+- `booleanSynonyms` – allow `yes`, `no`, `on` and `off` to be parsed as booleans.
+- `parseMapSets` – convert `Map:` and `Set:` strings.
+- `parseTypedArrays` – support typed array notation.
+- `parseExpressions` – evaluate simple math expressions.
+- `currencySymbols` – object mapping extra currency symbols to codes, e.g. `{ 'r$': 'BRL', "\u20BA": 'TRY' }`.
 
-## Benchmarks (v2.0.2)
+## Benchmarks (v2.1.0)
 
 The following timings are measured on Node.js using `npm test` and represent roughly how long it takes to parse 10 000 values after warm‑up:
 
@@ -146,6 +180,11 @@ Version 2.0 modernizes the project with an esbuild-powered build, ESM support,
 TypeScript definitions and a plugin API. It also adds parsing for `BigInt` and
 `Symbol` values. See [docs/RELEASE_NOTES_2.0.md](docs/RELEASE_NOTES_2.0.md) and
 [CHANGELOG.md](CHANGELOG.md) for the full list of changes.
+
+Version 2.1 expands automatic parsing with currency, percentages, unit and range
+strings, Map and Set objects, typed arrays, simple expression evaluation and
+optional environment variable and function-string handling. See
+[docs/RELEASE_NOTES_2.1.md](docs/RELEASE_NOTES_2.1.md) for details.
 
 ## Contributing
 

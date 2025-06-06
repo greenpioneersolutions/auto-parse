@@ -109,8 +109,9 @@ function checkBoolean (value, options) {
     return !!value
   }
   value = stripTrimLower(value, options)
-  if (value === 'true' || value === '1') return true
-  if (value === 'false' || value === '0') return false
+  const extras = options && options.booleanSynonyms
+  if (value === 'true' || value === '1' || (extras && (value === 'yes' || value === 'on'))) return true
+  if (value === 'false' || value === '0' || (extras && (value === 'no' || value === 'off'))) return false
   return null
 }
 /**
@@ -124,11 +125,11 @@ function checkBoolean (value, options) {
 function parseObject (value, options) {
   if (Array.isArray(value)) {
     return value.map(function (n, key) {
-      return autoParse(n, undefined, options)
+      return autoParse(n, options)
     })
   } else if (typeof value === 'object' || value.constructor === undefined) {
     for (const n in value) {
-      value[n] = autoParse(value[n], undefined, options)
+      value[n] = autoParse(value[n], options)
     }
     return value
   }
@@ -143,7 +144,116 @@ function parseObject (value, options) {
  *
  */
 function parseFunction (value, options) {
-  return autoParse(value(), undefined, options)
+  return autoParse(value(), options)
+}
+
+const CURRENCY_SYMBOLS = {
+  '$': 'USD',
+  '€': 'EUR',
+  '£': 'GBP',
+  '¥': 'JPY',
+  'A$': 'AUD',
+  'C$': 'CAD',
+  'CHF': 'CHF',
+  'HK$': 'HKD',
+  '₹': 'INR',
+  '₩': 'KRW'
+}
+
+function parseCurrencyString (str, options) {
+  const symbols = Object.assign({}, CURRENCY_SYMBOLS, options && options.currencySymbols)
+  for (const sym of Object.keys(symbols)) {
+    const re = new RegExp('^' + sym.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&') + '\\s?([0-9]+(?:[.,][0-9]+)?)$')
+    const m = re.exec(str)
+    if (m) {
+      const num = parseFloat(m[1].replace(',', '.'))
+      if (options && options.currencyAsObject) {
+        return { value: num, currency: symbols[sym] }
+      }
+      return num
+    }
+  }
+  return null
+}
+
+function parsePercentString (str, options) {
+  const m = /^([-+]?\d+(?:\.\d+)?)%$/.exec(str)
+  if (m) {
+    const val = Number(m[1]) / 100
+    if (options && options.percentAsObject) return { value: val, percent: true }
+    return val
+  }
+  return null
+}
+
+function parseUnitString (str) {
+  if (/^0[box]/i.test(str)) return null
+  const m = /^(-?\d+(?:\.\d+)?)([a-z%]+)$/i.exec(str)
+  if (m) return { value: Number(m[1]), unit: m[2] }
+  return null
+}
+
+function parseRangeString (str, options) {
+  const m = /^(-?\d+(?:\.\d+)?)\s*(?:\.\.|-)\s*(-?\d+(?:\.\d+)?)$/.exec(str)
+  if (m) {
+    const start = Number(m[1])
+    const end = Number(m[2])
+    if (options && options.rangeAsObject) return { start, end }
+    const arr = []
+    const step = start <= end ? 1 : -1
+    for (let i = start; step > 0 ? i <= end : i >= end; i += step) arr.push(i)
+    return arr
+  }
+  return null
+}
+
+function parseTypedArrayString (str, options) {
+  const m = /^([A-Za-z0-9]+Array)\[(.*)\]$/.exec(str)
+  if (m && typeof globalThis[m[1]] === 'function') {
+    const arr = autoParse(`[${m[2]}]`, options)
+    if (Array.isArray(arr)) return new globalThis[m[1]](arr)
+  }
+  return null
+}
+
+function parseMapSetString (str, options) {
+  if (/^Map:/i.test(str)) {
+    const inner = str.slice(4).trim()
+    const arr = autoParse(inner, options)
+    return new Map(arr)
+  }
+  if (/^Set:/i.test(str)) {
+    const inner = str.slice(4).trim()
+    const arr = autoParse(inner, options)
+    return new Set(arr)
+  }
+  return null
+}
+
+function parseExpressionString (str) {
+  if (/^[0-9+\-*/() %.]+$/.test(str) && /[+\-*/()%]/.test(str)) {
+    try {
+      // eslint-disable-next-line no-new-func
+      return Function('return (' + str + ')')()
+    } catch (e) {}
+  }
+  return null
+}
+
+function parseFunctionString (str) {
+  if (/^\s*(\(?\w*\)?\s*=>)/.test(str)) {
+    try {
+      // eslint-disable-next-line no-new-func
+      return Function('return (' + str + ')')()
+    } catch (e) {}
+  }
+  return null
+}
+
+function expandEnvVars (str) {
+  return str.replace(/\$([A-Z0-9_]+)/gi, function (m, name) {
+    return process.env[name] || ''
+  })
 }
 /**
  *
@@ -194,7 +304,7 @@ function parseType (value, type, options = {}) {
         } catch (e) {}
       }
       if (isType(jsonParsed, Object) || isType(jsonParsed, Array)) {
-        return autoParse(jsonParsed, undefined, options)
+        return autoParse(jsonParsed, options)
       } else if (!isType(jsonParsed, 'undefined')) {
         return {}
       }
@@ -217,9 +327,18 @@ function parseType (value, type, options = {}) {
       return null
     case 'array':
       return [value]
+    case 'map':
+      return new Map(autoParse(value, options))
+    case 'set':
+      return new Set(autoParse(value, options))
     default:
       if (typeof type === 'function') {
-        return new type(value) // eslint-disable-line
+        if (/Array$/.test(type.name)) {
+          const arr = autoParse(value, options)
+          // eslint-disable-next-line new-cap
+          if (Array.isArray(arr)) return new type(arr)
+        }
+        return new type(value) // eslint-disable-line new-cap
       }
       throw new Error('Unsupported type.')
   }
@@ -246,7 +365,16 @@ function parseType (value, type, options = {}) {
  * @param {Constructor|String} target The target type.
  * @return {String|Function|Date|Object|Boolean|Number|Undefined|Null|Array}
  */
-function autoParse (value, type, options = {}) {
+function autoParse (value, typeOrOptions) {
+  let type
+  let options
+  if (typeOrOptions && typeof typeOrOptions === 'object' && !Array.isArray(typeOrOptions) && !(typeOrOptions instanceof Function)) {
+    options = typeOrOptions
+    type = options.type
+  } else {
+    type = typeOrOptions
+    options = {}
+  }
   const pluginVal = runPlugins(value, type, options)
   if (pluginVal !== undefined) {
     return returnIfAllowed(pluginVal, options, value)
@@ -295,6 +423,17 @@ function autoParse (value, type, options = {}) {
   }
   let jsonParsed = null
   const trimmed = typeof value === 'string' ? value.trim() : ''
+  if (options.expandEnv) {
+    const expanded = expandEnvVars(trimmed)
+    if (expanded !== trimmed) {
+      return returnIfAllowed(autoParse(expanded, options), options, originalValue)
+    }
+  }
+  let mapSet
+  if (options.parseMapSets) {
+    mapSet = parseMapSetString(trimmed, options)
+    if (mapSet) return returnIfAllowed(mapSet, options, originalValue)
+  }
   if (/^['"]?[[{]/.test(trimmed)) {
     try {
       jsonParsed = JSON.parse(trimmed)
@@ -311,7 +450,35 @@ function autoParse (value, type, options = {}) {
     }
   }
   if (jsonParsed && typeof jsonParsed === 'object') {
-    return returnIfAllowed(autoParse(jsonParsed, undefined, options), options, originalValue)
+    return returnIfAllowed(autoParse(jsonParsed, options), options, originalValue)
+  }
+  if (options.parseTypedArrays) {
+    const typedArr = parseTypedArrayString(trimmed, options)
+    if (typedArr) return returnIfAllowed(typedArr, options, originalValue)
+  }
+  if (options.parseCurrency) {
+    const currency = parseCurrencyString(trimmed, options)
+    if (currency !== null) return returnIfAllowed(currency, options, originalValue)
+  }
+  if (options.parsePercent) {
+    const percent = parsePercentString(trimmed, options)
+    if (percent !== null) return returnIfAllowed(percent, options, originalValue)
+  }
+  if (options.parseUnits) {
+    const unit = parseUnitString(trimmed)
+    if (unit) return returnIfAllowed(unit, options, originalValue)
+  }
+  if (options.parseRanges) {
+    const range = parseRangeString(trimmed, options)
+    if (range) return returnIfAllowed(range, options, originalValue)
+  }
+  if (options.parseExpressions) {
+    const expr = parseExpressionString(trimmed)
+    if (expr !== null) return returnIfAllowed(expr, options, originalValue)
+  }
+  if (options.parseFunctionStrings) {
+    const fn = parseFunctionString(trimmed)
+    if (fn) return returnIfAllowed(fn, options, originalValue)
   }
   value = stripTrimLower(trimmed, Object.assign({}, options, { stripStartChars: false }))
   if (value === 'undefined' || value === '') {
