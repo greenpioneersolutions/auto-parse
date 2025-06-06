@@ -18,6 +18,7 @@
 
 ## 2.0.2 (2025-06-06)
 
+
 - Improved performance by caching regex used for stripping start characters.
 - Avoid unnecessary JSON parsing when input doesn't resemble JSON.
 - Faster numeric and boolean checks.

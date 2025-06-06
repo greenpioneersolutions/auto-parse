@@ -27,6 +27,7 @@ describe('Performance', () => {
     for (let i = 0; i < 100; i++) {
       autoParse('{"a":1,"b":2}')
     }
+
     const time = benchmark(() => {
       for (let i = 0; i < 1000; i++) {
         autoParse('{"a":1,"b":2}')
@@ -126,5 +127,6 @@ describe('Performance', () => {
     })
     console.log('plugin parse time', time)
     expect(time).toBeLessThan(65)
+
   })
 })
