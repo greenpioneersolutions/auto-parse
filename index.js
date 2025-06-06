@@ -61,16 +61,26 @@ autoParse.use = function (fn) {
  * @return {Value} parsed string
  *
  */
+const _stripCache = new Map()
+const QUOTE_RE = /['"]/g
+function getStripRegex (chars) {
+  let re = _stripCache.get(chars)
+  if (!re) {
+    const escaped = chars.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    re = new RegExp('^[' + escaped + ']+')
+    _stripCache.set(chars, re)
+  }
+  return re
+}
+
 function stripTrimLower (value, options = {}) {
   if (options.stripStartChars && typeof value === 'string') {
     const chars = Array.isArray(options.stripStartChars)
       ? options.stripStartChars.join('')
       : String(options.stripStartChars)
-    const escaped = chars.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-    const re = new RegExp('^[' + escaped + ']+')
-    value = value.replace(re, '')
+    value = value.replace(getStripRegex(chars), '')
   }
-  return value.replace(/[""'']/ig, '').trim().toLowerCase()
+  return value.replace(QUOTE_RE, '').trim().toLowerCase()
 }
 /**
  *
@@ -178,9 +188,11 @@ function parseType (value, type, options = {}) {
       return new Date(value)
     case 'object':
       let jsonParsed
-      try {
-        jsonParsed = JSON.parse(value)
-      } catch (e) {}
+      if (typeof value === 'string' && /^['"]?[[{]/.test(value.trim())) {
+        try {
+          jsonParsed = JSON.parse(value)
+        } catch (e) {}
+      }
       if (isType(jsonParsed, Object) || isType(jsonParsed, Array)) {
         return autoParse(jsonParsed, undefined, options)
       } else if (!isType(jsonParsed, 'undefined')) {
@@ -242,72 +254,71 @@ function autoParse (value, type, options = {}) {
   if (type) {
     return returnIfAllowed(parseType(value, type, options), options, value)
   }
-  const orignalValue = value
+  const originalValue = value
   if (typeof value === 'string' && options.stripStartChars) {
     const chars = Array.isArray(options.stripStartChars)
       ? options.stripStartChars.join('')
       : String(options.stripStartChars)
-    const escaped = chars.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-    const re = new RegExp('^[' + escaped + ']+')
-    value = value.replace(re, '')
+    value = value.replace(getStripRegex(chars), '')
   }
   /**
    *  PRE RULE - check for null be cause null can be typeof object which can  through off parsing
    */
   if (value === null) {
-    return returnIfAllowed(null, options, orignalValue)
+    return returnIfAllowed(null, options, originalValue)
   }
   /**
    * TYPEOF SECTION - Use to check and do specific things based off of know the type
    * Check against undefined
    */
   if (value === void 0) {
-    return returnIfAllowed(undefined, options, orignalValue)
+    return returnIfAllowed(undefined, options, originalValue)
   }
   if (value instanceof Date || value instanceof RegExp) {
-    return returnIfAllowed(value, options, orignalValue)
+    return returnIfAllowed(value, options, originalValue)
   }
   // eslint-disable-next-line valid-typeof
   if (typeof value === 'number' || typeof value === 'boolean' || typeof value === 'bigint' || typeof value === 'symbol') {
-    return returnIfAllowed(value, options, orignalValue)
+    return returnIfAllowed(value, options, originalValue)
   }
   if (typeof value === 'function') {
-    return returnIfAllowed(parseFunction(value, options), options, orignalValue)
+    return returnIfAllowed(parseFunction(value, options), options, originalValue)
   }
   if (typeof value === 'object') {
-    return returnIfAllowed(parseObject(value, options), options, orignalValue)
+    return returnIfAllowed(parseObject(value, options), options, originalValue)
   }
   /**
    * STRING SECTION - If we made it this far that means it is a string that we must do something with to parse
    */
   if (value === 'NaN') {
-    return returnIfAllowed(NaN, options, orignalValue)
+    return returnIfAllowed(NaN, options, originalValue)
   }
   let jsonParsed = null
-  try {
-    jsonParsed = JSON.parse(value)
-  } catch (e) {
+  const trimmed = typeof value === 'string' ? value.trim() : ''
+  if (/^['"]?[[{]/.test(trimmed)) {
     try {
-      jsonParsed = JSON.parse(
-        value.trim().replace(/(\\\\")|(\\")/gi, '"').replace(/(\\n|\\\\n)/gi, '').replace(/(^"|"$)|(^'|'$)/gi, '')
-      )
+      jsonParsed = JSON.parse(trimmed)
     } catch (e) {
       try {
         jsonParsed = JSON.parse(
-          value.trim().replace(/'/gi, '"')
+          trimmed.replace(/(\\\\")|(\\")/gi, '"').replace(/(\\n|\\\\n)/gi, '').replace(/(^"|"$)|(^'|'$)/gi, '')
         )
-      } catch (e) {}
+      } catch (e) {
+        try {
+          jsonParsed = JSON.parse(trimmed.replace(/'/gi, '"'))
+        } catch (e) {}
+      }
     }
   }
   if (jsonParsed && typeof jsonParsed === 'object') {
-    return returnIfAllowed(autoParse(jsonParsed, undefined, options), options, orignalValue)
+    return returnIfAllowed(autoParse(jsonParsed, undefined, options), options, originalValue)
   }
-  value = stripTrimLower(value, options)
+  value = stripTrimLower(trimmed, Object.assign({}, options, { stripStartChars: false }))
   if (value === 'undefined' || value === '') {
-    return returnIfAllowed(undefined, options, orignalValue)
+    return returnIfAllowed(undefined, options, originalValue)
   }
   if (value === 'null') {
-    return returnIfAllowed(null, options, orignalValue)
+    return returnIfAllowed(null, options, originalValue)
   }
   /**
    * Order Matter because if it is a one or zero boolean will come back with a awnser too. if you want it to be a boolean you must specify
@@ -320,19 +331,19 @@ function autoParse (value, type, options = {}) {
     }
   }
   const num = Number(numValue)
-  if (isType(num, Number)) {
+  if (!Number.isNaN(num)) {
     if (options.preserveLeadingZeros && /^0+\d+$/.test(value)) {
-      return returnIfAllowed(String(orignalValue), options, orignalValue)
+      return returnIfAllowed(String(originalValue), options, originalValue)
     }
-    return returnIfAllowed(num, options, orignalValue)
+    return returnIfAllowed(num, options, originalValue)
   }
   const boo = checkBoolean(value, options)
-  if (isType(boo, Boolean)) {
-    return returnIfAllowed(boo, options, orignalValue)
+  if (boo !== null) {
+    return returnIfAllowed(boo, options, originalValue)
   }
   /**
    * DEFAULT SECTION - bascially if we catch nothing we assume that you just have a string
    */
   // if string - convert to ""
-  return returnIfAllowed(String(orignalValue), options, orignalValue)
+  return returnIfAllowed(String(originalValue), options, originalValue)
 }

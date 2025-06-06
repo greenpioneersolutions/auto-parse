@@ -1,7 +1,7 @@
 {
   "name": "auto-parse",
-  "version": "2.0.1",
-  "description": "auto-parse any value you happen to send in (String, Number, Boolean,Array, Object, Function, undefined and null). You send it we will try to find a way to parse it.support sending in a string of what type (e.g. boolean) or constructor (e.g. Boolean)",
+  "version": "2.0.2",
+  "description": "Automatically convert any value to its best matching JavaScript type. Supports numbers, booleans, objects, arrays, BigInt, Symbol, comma-separated numbers, prefix stripping, allowed type enforcement and a plugin API.",
   "main": "index.js",
   "types": "index.d.ts",
   "exports": {
