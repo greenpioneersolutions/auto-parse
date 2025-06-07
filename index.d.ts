@@ -18,6 +18,8 @@ export interface AutoParseOptions {
   parseTypedArrays?: boolean;
   parseExpressions?: boolean;
   parseDates?: boolean;
+  parseUrls?: boolean;
+  parseFilePaths?: boolean;
   type?: any;
 }
 export type Parser = (value: any, type?: any, options?: AutoParseOptions) => any | undefined;

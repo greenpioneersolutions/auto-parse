@@ -26,6 +26,7 @@ A small utility that automatically converts strings and other values into the mo
 - Supports typed arrays
 - Evaluates simple math expressions
 - Recognizes common date/time formats
+- Detects URLs and file-system paths
 - Optional environment variable expansion
 - Optional function-string parsing
 - Advanced features are disabled by default and can be enabled individually
@@ -62,6 +63,8 @@ autoParse('Map:[["a",1]]', { parseMapSets: true }).get('a') // => 1
 autoParse('Uint8Array[1,2]', { parseTypedArrays: true })[0] // => 1
 autoParse('2 + 3 * 4', { parseExpressions: true }) // => 14
 autoParse('2023-06-01', { parseDates: true }) // => Date object
+autoParse('http://example.com', { parseUrls: true }) // => URL instance
+autoParse('./foo/bar', { parseFilePaths: true }) // => normalized path
 process.env.TEST_ENV = '123'
 autoParse('$TEST_ENV', { expandEnv: true }) // => 123
 const double = autoParse('x => x * 2', { parseFunctionStrings: true })
@@ -126,9 +129,11 @@ More examples can be found in the [`examples/`](examples) directory.
 - `parseTypedArrays` – support typed array notation.
 - `parseExpressions` – evaluate simple math expressions.
 - `parseDates` – recognize ISO 8601 and common local date/time strings.
+- `parseUrls` – detect valid URLs and return `URL` objects.
+- `parseFilePaths` – detect file-system paths and normalize them.
 - `currencySymbols` – object mapping extra currency symbols to codes, e.g. `{ 'r$': 'BRL', "\u20BA": 'TRY' }`.
 
-## Benchmarks (v2.2.0)
+## Benchmarks (v2.3.0)
 
 The following timings are measured on Node.js using `npm test` and represent roughly how long it takes to parse 10 000 values after warm‑up:
 
@@ -143,6 +148,8 @@ The following timings are measured on Node.js using `npm test` and represent rou
 | options combined | ~6 |
 | plugin hook | ~4 |
 | date/time parse | ~5 |
+| URL parse | ~5 |
+| file path parse | ~5 |
 
 Even a single parse is extremely fast:
 
@@ -157,6 +164,8 @@ Even a single parse is extremely fast:
 | options combined | ~0.0006 |
 | plugin hook | ~0.0004 |
 | date/time parse | ~0.0005 |
+| URL parse | ~0.0005 |
+| file path parse | ~0.0005 |
 
 These numbers demonstrate the parser runs in well under a millisecond for typical values, so performance should never be a concern.
 
@@ -193,6 +202,9 @@ optional environment variable and function-string handling. See
 
 Version 2.2 introduces optional date/time recognition. See
 [docs/RELEASE_NOTES_2.2.md](docs/RELEASE_NOTES_2.2.md) for details.
+
+Version 2.3 adds URL and file path detection. See
+[docs/RELEASE_NOTES_2.3.md](docs/RELEASE_NOTES_2.3.md) for details.
 
 ## Contributing
 
