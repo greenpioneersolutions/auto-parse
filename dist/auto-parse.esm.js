@@ -8,6 +8,7 @@ var require_auto_parse = __commonJS({
   "index.js"(exports, module) {
     module.exports = autoParse;
     var plugins = [];
+    var globalOnError = null;
     function isType(value, type) {
       if (typeof type === "string") {
         if (type.toLowerCase() === "array")
@@ -67,6 +68,9 @@ var require_auto_parse = __commonJS({
     autoParse.use = function(fn) {
       if (typeof fn === "function")
         plugins.push(fn);
+    };
+    autoParse.setErrorHandler = function(fn) {
+      globalOnError = typeof fn === "function" ? fn : null;
     };
     var _stripCache = /* @__PURE__ */ new Map();
     var QUOTE_RE = /['"]/g;
@@ -291,82 +295,92 @@ var require_auto_parse = __commonJS({
     }
     function parseType(value, type, options = {}) {
       let typeName = type;
-      if (value && value.constructor === type || isType(value, type) && typeName !== "object" && typeName !== "array") {
-        return value;
-      }
-      if (type && type.name) {
-        typeName = type.name.toLowerCase();
-      }
-      typeName = stripTrimLower(typeName);
-      switch (typeName) {
-        case "string":
-          if (typeof value === "object")
-            return JSON.stringify(value);
-          return String(value);
-        case "function":
-          if (isType(value, Function)) {
-            return value;
-          }
-          return function(cb) {
-            if (typeof cb === "function") {
-              cb(value);
+      try {
+        if (value && value.constructor === type || isType(value, type) && typeName !== "object" && typeName !== "array") {
+          return value;
+        }
+        if (type && type.name) {
+          typeName = type.name.toLowerCase();
+        }
+        typeName = stripTrimLower(typeName);
+        switch (typeName) {
+          case "string":
+            if (typeof value === "object")
+              return JSON.stringify(value);
+            return String(value);
+          case "function":
+            if (isType(value, Function)) {
+              return value;
             }
-            return value;
-          };
-        case "date":
-          return new Date(value);
-        case "object":
-          let jsonParsed;
-          if (typeof value === "string" && /^['"]?[[{]/.test(value.trim())) {
-            try {
-              jsonParsed = JSON.parse(value);
-            } catch (e) {
+            return function(cb) {
+              if (typeof cb === "function") {
+                cb(value);
+              }
+              return value;
+            };
+          case "date":
+            return new Date(value);
+          case "object":
+            let jsonParsed;
+            if (typeof value === "string" && /^['"]?[[{]/.test(value.trim())) {
+              try {
+                jsonParsed = JSON.parse(value);
+              } catch (e) {
+              }
             }
-          }
-          if (isType(jsonParsed, Object) || isType(jsonParsed, Array)) {
-            return autoParse(jsonParsed, options);
-          } else if (!isType(jsonParsed, "undefined")) {
-            return {};
-          }
-          return parseObject(value, options);
-        case "boolean":
-          return toBoolean(value, options);
-        case "number":
-          if (options.parseCommaNumbers && typeof value === "string") {
-            const normalized = value.replace(/,/g, "");
-            if (!Number.isNaN(Number(normalized)))
-              return Number(normalized);
-          }
-          return Number(value);
-        case "bigint":
-          return BigInt(value);
-        case "symbol":
-          return Symbol(value);
-        case "undefined":
-          return void 0;
-        case "null":
-          return null;
-        case "array":
-          return [value];
-        case "map":
-          return new Map(autoParse(value, options));
-        case "set":
-          return new Set(autoParse(value, options));
-        case "url":
-          return new URL(value);
-        case "path":
-        case "filepath":
-          return parseFilePathString(String(value)) || String(value);
-        default:
-          if (typeof type === "function") {
-            if (/Array$/.test(type.name)) {
-              const arr = autoParse(value, options);
-              if (Array.isArray(arr))
-                return new type(arr);
+            if (isType(jsonParsed, Object) || isType(jsonParsed, Array)) {
+              return autoParse(jsonParsed, options);
+            } else if (!isType(jsonParsed, "undefined")) {
+              return {};
             }
-            return new type(value);
-          }
-          throw new Error("Unsupported type.");
+            return parseObject(value, options);
+          case "boolean":
+            return toBoolean(value, options);
+          case "number":
+            if (options.parseCommaNumbers && typeof value === "string") {
+              const normalized = value.replace(/,/g, "");
+              if (!Number.isNaN(Number(normalized)))
+                return Number(normalized);
+            }
+            return Number(value);
+          case "bigint":
+            return BigInt(value);
+          case "symbol":
+            return Symbol(value);
+          case "undefined":
+            return void 0;
+          case "null":
+            return null;
+          case "array":
+            return [value];
+          case "map":
+            return new Map(autoParse(value, options));
+          case "set":
+            return new Set(autoParse(value, options));
+          case "url":
+            return new URL(value);
+          case "path":
+          case "filepath":
+            return parseFilePathString(String(value)) || String(value);
+          default:
+            if (typeof type === "function") {
+              if (/Array$/.test(type.name)) {
+                const arr = autoParse(value, options);
+                if (Array.isArray(arr))
+                  return new type(arr);
+              }
+              return new type(value);
+            }
+            throw new Error("Unsupported type.");
+        }
+      } catch (err) {
+        if (options && typeof options.onError === "function") {
+          return returnIfAllowed(options.onError(err, value, type), options, value);
+        }
+        if (typeof globalOnError === "function") {
+          return returnIfAllowed(globalOnError(err, value, type), options, value);
+        }
+        throw err;
       }
     }
     function autoParse(value, typeOrOptions) {
@@ -379,148 +393,158 @@ var require_auto_parse = __commonJS({
         type = typeOrOptions;
         options = {};
       }
-      const pluginVal = runPlugins(value, type, options);
-      if (pluginVal !== void 0) {
-        return returnIfAllowed(pluginVal, options, value);
-      }
-      if (type) {
-        return returnIfAllowed(parseType(value, type, options), options, value);
-      }
-      const originalValue = value;
-      if (typeof value === "string" && options.stripStartChars) {
-        const chars = Array.isArray(options.stripStartChars) ? options.stripStartChars.join("") : String(options.stripStartChars);
-        value = value.replace(getStripRegex(chars), "");
-      }
-      if (value === null) {
-        return returnIfAllowed(null, options, originalValue);
-      }
-      if (value === void 0) {
-        return returnIfAllowed(void 0, options, originalValue);
-      }
-      if (value instanceof Date || value instanceof RegExp) {
-        return returnIfAllowed(value, options, originalValue);
-      }
-      if (typeof value === "number" || typeof value === "boolean" || typeof value === "bigint" || typeof value === "symbol") {
-        return returnIfAllowed(value, options, originalValue);
-      }
-      if (typeof value === "function") {
-        return returnIfAllowed(parseFunction(value, options), options, originalValue);
-      }
-      if (typeof value === "object") {
-        return returnIfAllowed(parseObject(value, options), options, originalValue);
-      }
-      if (value === "NaN") {
-        return returnIfAllowed(NaN, options, originalValue);
-      }
-      let jsonParsed = null;
-      const trimmed = typeof value === "string" ? value.trim() : "";
-      if (options.expandEnv) {
-        const expanded = expandEnvVars(trimmed);
-        if (expanded !== trimmed) {
-          return returnIfAllowed(autoParse(expanded, options), options, originalValue);
+      try {
+        const pluginVal = runPlugins(value, type, options);
+        if (pluginVal !== void 0) {
+          return returnIfAllowed(pluginVal, options, value);
         }
-      }
-      let mapSet;
-      if (options.parseMapSets) {
-        mapSet = parseMapSetString(trimmed, options);
-        if (mapSet)
-          return returnIfAllowed(mapSet, options, originalValue);
-      }
-      if (/^['"]?[[{]/.test(trimmed)) {
-        try {
-          jsonParsed = JSON.parse(trimmed);
-        } catch (e) {
+        if (type) {
+          return returnIfAllowed(parseType(value, type, options), options, value);
+        }
+        const originalValue = value;
+        if (typeof value === "string" && options.stripStartChars) {
+          const chars = Array.isArray(options.stripStartChars) ? options.stripStartChars.join("") : String(options.stripStartChars);
+          value = value.replace(getStripRegex(chars), "");
+        }
+        if (value === null) {
+          return returnIfAllowed(null, options, originalValue);
+        }
+        if (value === void 0) {
+          return returnIfAllowed(void 0, options, originalValue);
+        }
+        if (value instanceof Date || value instanceof RegExp) {
+          return returnIfAllowed(value, options, originalValue);
+        }
+        if (typeof value === "number" || typeof value === "boolean" || typeof value === "bigint" || typeof value === "symbol") {
+          return returnIfAllowed(value, options, originalValue);
+        }
+        if (typeof value === "function") {
+          return returnIfAllowed(parseFunction(value, options), options, originalValue);
+        }
+        if (typeof value === "object") {
+          return returnIfAllowed(parseObject(value, options), options, originalValue);
+        }
+        if (value === "NaN") {
+          return returnIfAllowed(NaN, options, originalValue);
+        }
+        let jsonParsed = null;
+        const trimmed = typeof value === "string" ? value.trim() : "";
+        if (options.expandEnv) {
+          const expanded = expandEnvVars(trimmed);
+          if (expanded !== trimmed) {
+            return returnIfAllowed(autoParse(expanded, options), options, originalValue);
+          }
+        }
+        let mapSet;
+        if (options.parseMapSets) {
+          mapSet = parseMapSetString(trimmed, options);
+          if (mapSet)
+            return returnIfAllowed(mapSet, options, originalValue);
+        }
+        if (/^['"]?[[{]/.test(trimmed)) {
           try {
-            jsonParsed = JSON.parse(
-              trimmed.replace(/(\\\\")|(\\")/gi, '"').replace(/(\\n|\\\\n)/gi, "").replace(/(^"|"$)|(^'|'$)/gi, "")
-            );
-          } catch (e2) {
+            jsonParsed = JSON.parse(trimmed);
+          } catch (e) {
             try {
-              jsonParsed = JSON.parse(trimmed.replace(/'/gi, '"'));
-            } catch (e3) {
+              jsonParsed = JSON.parse(
+                trimmed.replace(/(\\\\")|(\\")/gi, '"').replace(/(\\n|\\\\n)/gi, "").replace(/(^"|"$)|(^'|'$)/gi, "")
+              );
+            } catch (e2) {
+              try {
+                jsonParsed = JSON.parse(trimmed.replace(/'/gi, '"'));
+              } catch (e3) {
+              }
             }
           }
         }
-      }
-      if (jsonParsed && typeof jsonParsed === "object") {
-        return returnIfAllowed(autoParse(jsonParsed, options), options, originalValue);
-      }
-      if (options.parseTypedArrays) {
-        const typedArr = parseTypedArrayString(trimmed, options);
-        if (typedArr)
-          return returnIfAllowed(typedArr, options, originalValue);
-      }
-      if (options.parseCurrency) {
-        const currency = parseCurrencyString(trimmed, options);
-        if (currency !== null)
-          return returnIfAllowed(currency, options, originalValue);
-      }
-      if (options.parsePercent) {
-        const percent = parsePercentString(trimmed, options);
-        if (percent !== null)
-          return returnIfAllowed(percent, options, originalValue);
-      }
-      if (options.parseUnits) {
-        const unit = parseUnitString(trimmed);
-        if (unit)
-          return returnIfAllowed(unit, options, originalValue);
-      }
-      if (options.parseRanges) {
-        const range = parseRangeString(trimmed, options);
-        if (range)
-          return returnIfAllowed(range, options, originalValue);
-      }
-      if (options.parseExpressions) {
-        const expr = parseExpressionString(trimmed);
-        if (expr !== null)
-          return returnIfAllowed(expr, options, originalValue);
-      }
-      if (options.parseFunctionStrings) {
-        const fn = parseFunctionString(trimmed);
-        if (fn)
-          return returnIfAllowed(fn, options, originalValue);
-      }
-      if (options.parseDates) {
-        const dt = parseDateTimeString(trimmed);
-        if (dt)
-          return returnIfAllowed(dt, options, originalValue);
-      }
-      if (options.parseUrls) {
-        const u = parseUrlString(trimmed);
-        if (u)
-          return returnIfAllowed(u, options, originalValue);
-      }
-      if (options.parseFilePaths) {
-        const p = parseFilePathString(trimmed);
-        if (p)
-          return returnIfAllowed(p, options, originalValue);
-      }
-      value = stripTrimLower(trimmed, Object.assign({}, options, { stripStartChars: false }));
-      if (value === "undefined" || value === "") {
-        return returnIfAllowed(void 0, options, originalValue);
-      }
-      if (value === "null") {
-        return returnIfAllowed(null, options, originalValue);
-      }
-      let numValue = value;
-      if (options.parseCommaNumbers && typeof numValue === "string" && numValue.includes(",")) {
-        const normalized = numValue.replace(/,/g, "");
-        if (!Number.isNaN(Number(normalized))) {
-          numValue = normalized;
+        if (jsonParsed && typeof jsonParsed === "object") {
+          return returnIfAllowed(autoParse(jsonParsed, options), options, originalValue);
         }
-      }
-      const num = Number(numValue);
-      if (!Number.isNaN(num)) {
-        if (options.preserveLeadingZeros && /^0+\d+$/.test(value)) {
-          return returnIfAllowed(String(originalValue), options, originalValue);
+        if (options.parseTypedArrays) {
+          const typedArr = parseTypedArrayString(trimmed, options);
+          if (typedArr)
+            return returnIfAllowed(typedArr, options, originalValue);
         }
-        return returnIfAllowed(num, options, originalValue);
+        if (options.parseCurrency) {
+          const currency = parseCurrencyString(trimmed, options);
+          if (currency !== null)
+            return returnIfAllowed(currency, options, originalValue);
+        }
+        if (options.parsePercent) {
+          const percent = parsePercentString(trimmed, options);
+          if (percent !== null)
+            return returnIfAllowed(percent, options, originalValue);
+        }
+        if (options.parseUnits) {
+          const unit = parseUnitString(trimmed);
+          if (unit)
+            return returnIfAllowed(unit, options, originalValue);
+        }
+        if (options.parseRanges) {
+          const range = parseRangeString(trimmed, options);
+          if (range)
+            return returnIfAllowed(range, options, originalValue);
+        }
+        if (options.parseExpressions) {
+          const expr = parseExpressionString(trimmed);
+          if (expr !== null)
+            return returnIfAllowed(expr, options, originalValue);
+        }
+        if (options.parseFunctionStrings) {
+          const fn = parseFunctionString(trimmed);
+          if (fn)
+            return returnIfAllowed(fn, options, originalValue);
+        }
+        if (options.parseDates) {
+          const dt = parseDateTimeString(trimmed);
+          if (dt)
+            return returnIfAllowed(dt, options, originalValue);
+        }
+        if (options.parseUrls) {
+          const u = parseUrlString(trimmed);
+          if (u)
+            return returnIfAllowed(u, options, originalValue);
+        }
+        if (options.parseFilePaths) {
+          const p = parseFilePathString(trimmed);
+          if (p)
+            return returnIfAllowed(p, options, originalValue);
+        }
+        value = stripTrimLower(trimmed, Object.assign({}, options, { stripStartChars: false }));
+        if (value === "undefined" || value === "") {
+          return returnIfAllowed(void 0, options, originalValue);
+        }
+        if (value === "null") {
+          return returnIfAllowed(null, options, originalValue);
+        }
+        let numValue = value;
+        if (options.parseCommaNumbers && typeof numValue === "string" && numValue.includes(",")) {
+          const normalized = numValue.replace(/,/g, "");
+          if (!Number.isNaN(Number(normalized))) {
+            numValue = normalized;
+          }
+        }
+        const num = Number(numValue);
+        if (!Number.isNaN(num)) {
+          if (options.preserveLeadingZeros && /^0+\d+$/.test(value)) {
+            return returnIfAllowed(String(originalValue), options, originalValue);
+          }
+          return returnIfAllowed(num, options, originalValue);
+        }
+        const boo = checkBoolean(value, options);
+        if (boo !== null) {
+          return returnIfAllowed(boo, options, originalValue);
+        }
+        return returnIfAllowed(String(originalValue), options, originalValue);
+      } catch (err) {
+        if (options && typeof options.onError === "function") {
+          return returnIfAllowed(options.onError(err, value, type), options, value);
+        }
+        if (typeof globalOnError === "function") {
+          return returnIfAllowed(globalOnError(err, value, type), options, value);
+        }
+        throw err;
       }
-      const boo = checkBoolean(value, options);
-      if (boo !== null) {
-        return returnIfAllowed(boo, options, originalValue);
-      }
-      return returnIfAllowed(String(originalValue), options, originalValue);
     }
   }
 });

@@ -180,4 +180,33 @@ describe('Performance', () => {
     console.log('path parse time', time)
     expect(time).toBeLessThan(300)
   })
+
+  test('error callback performance', () => {
+    const opts = { type: 'BigInt', onError: () => 0 }
+    for (let i = 0; i < 1000; i++) {
+      autoParse('bad', opts)
+    }
+    const time = benchmark(() => {
+      for (let i = 0; i < 10000; i++) {
+        autoParse('bad', opts)
+      }
+    })
+    console.log('error callback time', time)
+    expect(time).toBeLessThan(300)
+  })
+
+  test('global handler performance', () => {
+    autoParse.setErrorHandler(() => 0)
+    for (let i = 0; i < 1000; i++) {
+      autoParse('bad', 'BigInt')
+    }
+    const time = benchmark(() => {
+      for (let i = 0; i < 10000; i++) {
+        autoParse('bad', 'BigInt')
+      }
+    })
+    console.log('global handler time', time)
+    expect(time).toBeLessThan(300)
+    autoParse.setErrorHandler(null)
+  })
 })

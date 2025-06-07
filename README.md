@@ -29,6 +29,7 @@ A small utility that automatically converts strings and other values into the mo
 - Detects URLs and file-system paths
 - Optional environment variable expansion
 - Optional function-string parsing
+- Global and per-call error-handling callbacks
 - Advanced features are disabled by default and can be enabled individually
 
 ## Installation
@@ -92,6 +93,28 @@ autoParse.use(value => {
 autoParse('color:red') // => { color: '#FF0000' }
 ```
 
+### Custom error handler
+
+Use the `onError` option or a global handler to catch parsing errors and return a fallback result:
+
+```js
+autoParse('abc', {
+  type: 'BigInt',
+  onError (err, value, type) {
+    console.warn('Could not parse', value, 'as', type)
+    return 0
+  }
+}) // => 0
+```
+
+// Set a global handler for all subsequent parses
+autoParse.setErrorHandler((err, value, type) => {
+  console.error('Parsing failed:', err.message)
+  return null
+})
+
+autoParse('bad', 'BigInt') // => null
+
 ### Options
 
 Use the third `options` argument to fine‑tune parsing behavior:
@@ -132,8 +155,9 @@ More examples can be found in the [`examples/`](examples) directory.
 - `parseUrls` – detect valid URLs and return `URL` objects.
 - `parseFilePaths` – detect file-system paths and normalize them.
 - `currencySymbols` – object mapping extra currency symbols to codes, e.g. `{ 'r$': 'BRL', "\u20BA": 'TRY' }`.
+- `onError` – function called with `(error, value, type)` when parsing throws; its return value is used instead. Falls back to the global handler if set.
 
-## Benchmarks (v2.3.0)
+## Benchmarks (v2.4.0)
 
 The following timings are measured on Node.js using `npm test` and represent roughly how long it takes to parse 10 000 values after warm‑up:
 
@@ -147,6 +171,8 @@ The following timings are measured on Node.js using `npm test` and represent rou
 | plain objects | ~3 |
 | options combined | ~6 |
 | plugin hook | ~4 |
+| error callback | ~4 |
+| global handler | ~4 |
 | date/time parse | ~5 |
 | URL parse | ~5 |
 | file path parse | ~5 |
@@ -163,6 +189,8 @@ Even a single parse is extremely fast:
 | plain objects | ~0.0003 |
 | options combined | ~0.0006 |
 | plugin hook | ~0.0004 |
+| error callback | ~0.0004 |
+| global handler | ~0.0004 |
 | date/time parse | ~0.0005 |
 | URL parse | ~0.0005 |
 | file path parse | ~0.0005 |
@@ -205,6 +233,9 @@ Version 2.2 introduces optional date/time recognition. See
 
 Version 2.3 adds URL and file path detection. See
 [docs/RELEASE_NOTES_2.3.md](docs/RELEASE_NOTES_2.3.md) for details.
+
+Version 2.4 introduces a customizable error-handling callback. See
+[docs/RELEASE_NOTES_2.4.md](docs/RELEASE_NOTES_2.4.md) for details.
 
 ## Contributing
 
