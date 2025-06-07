@@ -7,3 +7,4 @@ them with `node <file>` from this directory.
 - `plugin.js` illustrates registering a simple plugin.
 - `types.js` covers advanced types like `BigInt` and `Symbol`.
 - `dates.js` demonstrates the optional date/time parsing capability.
+- `all-options.js` exercises every available option in one script.
