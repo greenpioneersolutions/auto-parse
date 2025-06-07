@@ -39,3 +39,8 @@
 
 - Built-in date/time recognition for ISO 8601 and common local formats
 - New `parseDates` option to enable the feature
+
+## 2.3.0 (2025-06-09)
+
+- URL and file path detection via `parseUrls` and `parseFilePaths` options
+- New examples and benchmarks covering the feature

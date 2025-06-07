@@ -154,4 +154,30 @@ describe('Performance', () => {
     console.log('date parse time', time)
     expect(time).toBeLessThan(300)
   })
+
+  test('url parse performance', () => {
+    for (let i = 0; i < 1000; i++) {
+      autoParse('https://example.com', { parseUrls: true })
+    }
+    const time = benchmark(() => {
+      for (let i = 0; i < 10000; i++) {
+        autoParse('https://example.com', { parseUrls: true })
+      }
+    })
+    console.log('url parse time', time)
+    expect(time).toBeLessThan(300)
+  })
+
+  test('file path parse performance', () => {
+    for (let i = 0; i < 1000; i++) {
+      autoParse('./foo/bar', { parseFilePaths: true })
+    }
+    const time = benchmark(() => {
+      for (let i = 0; i < 10000; i++) {
+        autoParse('./foo/bar', { parseFilePaths: true })
+      }
+    })
+    console.log('path parse time', time)
+    expect(time).toBeLessThan(300)
+  })
 })
