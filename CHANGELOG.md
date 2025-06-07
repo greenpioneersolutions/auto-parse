@@ -34,3 +34,8 @@
 - Simple math expression evaluation
 - Optional env variable expansion and function-string parsing
 - Advanced features must be enabled individually via options
+
+## 2.2.0 (2025-06-08)
+
+- Built-in date/time recognition for ISO 8601 and common local formats
+- New `parseDates` option to enable the feature

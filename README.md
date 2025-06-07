@@ -25,6 +25,7 @@ A small utility that automatically converts strings and other values into the mo
 - Converts `Map:` and `Set:` strings into real objects
 - Supports typed arrays
 - Evaluates simple math expressions
+- Recognizes common date/time formats
 - Optional environment variable expansion
 - Optional function-string parsing
 - Advanced features are disabled by default and can be enabled individually
@@ -60,6 +61,7 @@ autoParse('yes', { booleanSynonyms: true })  // => true
 autoParse('Map:[["a",1]]', { parseMapSets: true }).get('a') // => 1
 autoParse('Uint8Array[1,2]', { parseTypedArrays: true })[0] // => 1
 autoParse('2 + 3 * 4', { parseExpressions: true }) // => 14
+autoParse('2023-06-01', { parseDates: true }) // => Date object
 process.env.TEST_ENV = '123'
 autoParse('$TEST_ENV', { expandEnv: true }) // => 123
 const double = autoParse('x => x * 2', { parseFunctionStrings: true })
@@ -123,9 +125,10 @@ More examples can be found in the [`examples/`](examples) directory.
 - `parseMapSets` – convert `Map:` and `Set:` strings.
 - `parseTypedArrays` – support typed array notation.
 - `parseExpressions` – evaluate simple math expressions.
+- `parseDates` – recognize ISO 8601 and common local date/time strings.
 - `currencySymbols` – object mapping extra currency symbols to codes, e.g. `{ 'r$': 'BRL', "\u20BA": 'TRY' }`.
 
-## Benchmarks (v2.1.0)
+## Benchmarks (v2.2.0)
 
 The following timings are measured on Node.js using `npm test` and represent roughly how long it takes to parse 10 000 values after warm‑up:
 
@@ -139,6 +142,7 @@ The following timings are measured on Node.js using `npm test` and represent rou
 | plain objects | ~3 |
 | options combined | ~6 |
 | plugin hook | ~4 |
+| date/time parse | ~5 |
 
 Even a single parse is extremely fast:
 
@@ -152,6 +156,7 @@ Even a single parse is extremely fast:
 | plain objects | ~0.0003 |
 | options combined | ~0.0006 |
 | plugin hook | ~0.0004 |
+| date/time parse | ~0.0005 |
 
 These numbers demonstrate the parser runs in well under a millisecond for typical values, so performance should never be a concern.
 
@@ -185,6 +190,9 @@ Version 2.1 expands automatic parsing with currency, percentages, unit and range
 strings, Map and Set objects, typed arrays, simple expression evaluation and
 optional environment variable and function-string handling. See
 [docs/RELEASE_NOTES_2.1.md](docs/RELEASE_NOTES_2.1.md) for details.
+
+Version 2.2 introduces optional date/time recognition. See
+[docs/RELEASE_NOTES_2.2.md](docs/RELEASE_NOTES_2.2.md) for details.
 
 ## Contributing
 
