@@ -195,6 +195,56 @@ function parseMapSetString(str, options) {
   }
   return null;
 }
+function parseDateTimeString(str) {
+  const iso = /^\d{4}-\d{2}-\d{2}(?:[ T]\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?(?:Z|[+-]\d{2}:?\d{2})?)?$/;
+  if (iso.test(str)) {
+    const d = new Date(str);
+    if (!Number.isNaN(d.getTime()))
+      return d;
+  }
+  let m = /^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\s+(\d{1,2}):(\d{2})(?::(\d{2}))?(?:\s*([AP]M))?)?$/i.exec(str);
+  if (m) {
+    let [, month, day, year, h, min, sec, ap] = m;
+    const date = new Date(Number(year), Number(month) - 1, Number(day));
+    if (h !== void 0) {
+      h = Number(h);
+      if (ap) {
+        ap = ap.toLowerCase();
+        if (ap === "pm" && h < 12)
+          h += 12;
+        if (ap === "am" && h === 12)
+          h = 0;
+      }
+      date.setHours(h, Number(min), Number(sec || 0), 0);
+    }
+    return date;
+  }
+  m = /^(\d{1,2})-(\d{1,2})-(\d{4})(?:\s+(\d{1,2}):(\d{2})(?::(\d{2}))?)?$/.exec(str);
+  if (m) {
+    const [, day, month, year, h, min, sec] = m;
+    const date = new Date(Number(year), Number(month) - 1, Number(day));
+    if (h !== void 0) {
+      date.setHours(Number(h), Number(min), Number(sec || 0), 0);
+    }
+    return date;
+  }
+  m = /^(\d{1,2}):(\d{2})(?::(\d{2}))?(?:\s*([AP]M))?$/i.exec(str);
+  if (m) {
+    let [, h, min, sec, ap] = m;
+    h = Number(h);
+    if (ap) {
+      ap = ap.toLowerCase();
+      if (ap === "pm" && h < 12)
+        h += 12;
+      if (ap === "am" && h === 12)
+        h = 0;
+    }
+    const date = /* @__PURE__ */ new Date();
+    date.setHours(h, Number(min), Number(sec || 0), 0);
+    return date;
+  }
+  return null;
+}
 function parseExpressionString(str) {
   if (/^[0-9+\-*/() %.]+$/.test(str) && /[+\-*/()%]/.test(str)) {
     try {
@@ -403,6 +453,11 @@ function autoParse(value, typeOrOptions) {
     const fn = parseFunctionString(trimmed);
     if (fn)
       return returnIfAllowed(fn, options, originalValue);
+  }
+  if (options.parseDates) {
+    const dt = parseDateTimeString(trimmed);
+    if (dt)
+      return returnIfAllowed(dt, options, originalValue);
   }
   value = stripTrimLower(trimmed, Object.assign({}, options, { stripStartChars: false }));
   if (value === "undefined" || value === "") {

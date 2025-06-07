@@ -141,4 +141,17 @@ describe('Performance', () => {
     console.log('expression parse time', time)
     expect(time).toBeLessThan(300)
   })
+
+  test('date parse performance', () => {
+    for (let i = 0; i < 1000; i++) {
+      autoParse('2023-06-01T12:00:00Z', { parseDates: true })
+    }
+    const time = benchmark(() => {
+      for (let i = 0; i < 10000; i++) {
+        autoParse('2023-06-01T12:00:00Z', { parseDates: true })
+      }
+    })
+    console.log('date parse time', time)
+    expect(time).toBeLessThan(300)
+  })
 })
