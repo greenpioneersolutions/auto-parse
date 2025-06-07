@@ -28,10 +28,10 @@ describe('Error handling hook', function () {
       assert.instanceOf(err, Error)
       assert.strictEqual(value, 'abc')
       assert.strictEqual(type, 'BigInt')
-      return 1n
+      return BigInt(1)
     })
     const result = autoParse('abc', 'BigInt')
-    assert.strictEqual(result, 1n)
+    assert.strictEqual(result, BigInt(1))
     assert.strictEqual(called, true)
     autoParse.setErrorHandler(null)
   })
