@@ -252,6 +252,20 @@ var require_auto_parse = __commonJS({
       }
       return null;
     }
+    function parseUrlString(str) {
+      try {
+        return new URL(str);
+      } catch (e) {
+        return null;
+      }
+    }
+    function parseFilePathString(str) {
+      const re = /^(?:[A-Za-z]:[\\/]|\\\\|\.{1,2}[\\/]|~[\\/]|\/)/;
+      if (re.test(str)) {
+        return str.replace(/\\+/g, "/").replace(/\/+/g, "/");
+      }
+      return null;
+    }
     function parseExpressionString(str) {
       if (/^[0-9+\-*/() %.]+$/.test(str) && /[+\-*/()%]/.test(str)) {
         try {
@@ -338,6 +352,11 @@ var require_auto_parse = __commonJS({
           return new Map(autoParse(value, options));
         case "set":
           return new Set(autoParse(value, options));
+        case "url":
+          return new URL(value);
+        case "path":
+        case "filepath":
+          return parseFilePathString(String(value)) || String(value);
         default:
           if (typeof type === "function") {
             if (/Array$/.test(type.name)) {
@@ -465,6 +484,16 @@ var require_auto_parse = __commonJS({
         const dt = parseDateTimeString(trimmed);
         if (dt)
           return returnIfAllowed(dt, options, originalValue);
+      }
+      if (options.parseUrls) {
+        const u = parseUrlString(trimmed);
+        if (u)
+          return returnIfAllowed(u, options, originalValue);
+      }
+      if (options.parseFilePaths) {
+        const p = parseFilePathString(trimmed);
+        if (p)
+          return returnIfAllowed(p, options, originalValue);
       }
       value = stripTrimLower(trimmed, Object.assign({}, options, { stripStartChars: false }));
       if (value === "undefined" || value === "") {
