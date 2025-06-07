@@ -44,3 +44,9 @@
 
 - URL and file path detection via `parseUrls` and `parseFilePaths` options
 - New examples and benchmarks covering the feature
+
+## 2.4.0 (2025-06-10)
+
+- Optional `onError` callback allows custom handling of parsing errors
+- Global handler via `autoParse.setErrorHandler`
+- Benchmarks and documentation updated
