@@ -73,10 +73,15 @@ var require_auto_parse = __commonJS({
       globalOnError = typeof fn === "function" ? fn : null;
     };
     var _stripCache = /* @__PURE__ */ new Map();
+    var STRIP_CACHE_LIMIT = 100;
     var QUOTE_RE = /['"]/g;
     function getStripRegex(chars) {
       let re = _stripCache.get(chars);
       if (!re) {
+        if (_stripCache.size >= STRIP_CACHE_LIMIT) {
+          var firstKey = _stripCache.keys().next().value;
+          _stripCache.delete(firstKey);
+        }
         const escaped = chars.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
         re = new RegExp("^[" + escaped + "]+");
         _stripCache.set(chars, re);
@@ -109,15 +114,29 @@ var require_auto_parse = __commonJS({
       return null;
     }
     function parseObject(value, options) {
+      var seen = options && options._seen;
+      if (!seen) {
+        seen = /* @__PURE__ */ new WeakSet();
+        options = Object.assign({}, options, { _seen: seen });
+      }
+      if (seen.has(value))
+        return value;
+      seen.add(value);
       if (Array.isArray(value)) {
-        return value.map(function(n, key) {
+        return value.map(function(n) {
           return autoParse(n, options);
         });
       } else if (typeof value === "object" || value.constructor === void 0) {
+        var schema = options && options.schema;
+        var result = Object.create(Object.getPrototypeOf(value));
         for (const n in value) {
-          value[n] = autoParse(value[n], options);
+          if (schema && schema[n]) {
+            result[n] = parseType(value[n], schema[n], options);
+          } else {
+            result[n] = autoParse(value[n], options);
+          }
         }
-        return value;
+        return result;
       }
       return {};
     }
@@ -206,34 +225,57 @@ var require_auto_parse = __commonJS({
       }
       return null;
     }
-    function parseDateTimeString(str) {
-      const iso = /^\d{4}-\d{2}-\d{2}(?:[ T]\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?(?:Z|[+-]\d{2}:?\d{2})?)?$/;
+    function parseDateTimeString(str, options) {
+      var fmt = options && options.dateFormat;
+      var iso = /^\d{4}-\d{2}-\d{2}(?:[ T]\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?(?:Z|[+-]\d{2}:?\d{2})?)?$/;
       if (iso.test(str)) {
-        const d = new Date(str);
+        var d = new Date(str);
         if (!Number.isNaN(d.getTime()))
           return d;
       }
-      let m = /^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\s+(\d{1,2}):(\d{2})(?::(\d{2}))?(?:\s*([AP]M))?)?$/i.exec(str);
+      var slashRe = /^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\s+(\d{1,2}):(\d{2})(?::(\d{2}))?(?:\s*([AP]M))?)?$/i;
+      var m = fmt !== "iso" ? slashRe.exec(str) : null;
       if (m) {
-        let [, month, day, year, h, min, sec, ap] = m;
-        const date = new Date(Number(year), Number(month) - 1, Number(day));
-        if (h !== void 0) {
-          h = Number(h);
+        let first = Number(m[1]);
+        let second = Number(m[2]);
+        let month, day;
+        if (fmt === "eu") {
+          day = first;
+          month = second;
+        } else {
+          month = first;
+          day = second;
+        }
+        let [, , , year2, h2, min2, sec2, ap] = m;
+        var date = new Date(Number(year2), month - 1, day);
+        if (h2 !== void 0) {
+          h2 = Number(h2);
           if (ap) {
             ap = ap.toLowerCase();
-            if (ap === "pm" && h < 12)
-              h += 12;
-            if (ap === "am" && h === 12)
-              h = 0;
+            if (ap === "pm" && h2 < 12)
+              h2 += 12;
+            if (ap === "am" && h2 === 12)
+              h2 = 0;
           }
-          date.setHours(h, Number(min), Number(sec || 0), 0);
+          date.setHours(h2, Number(min2), Number(sec2 || 0), 0);
         }
         return date;
       }
-      m = /^(\d{1,2})-(\d{1,2})-(\d{4})(?:\s+(\d{1,2}):(\d{2})(?::(\d{2}))?)?$/.exec(str);
+      var dashRe = /^(\d{1,2})-(\d{1,2})-(\d{4})(?:\s+(\d{1,2}):(\d{2})(?::(\d{2}))?)?$/;
+      m = fmt !== "iso" ? dashRe.exec(str) : null;
       if (m) {
-        const [, day, month, year, h, min, sec] = m;
-        const date = new Date(Number(year), Number(month) - 1, Number(day));
+        let first = Number(m[1]);
+        let second = Number(m[2]);
+        let month, day;
+        if (fmt === "us") {
+          month = first;
+          day = second;
+        } else {
+          day = first;
+          month = second;
+        }
+        var [, , , year, h, min, sec] = m;
+        var date = new Date(Number(year), month - 1, day);
         if (h !== void 0) {
           date.setHours(Number(h), Number(min), Number(sec || 0), 0);
         }
@@ -241,17 +283,17 @@ var require_auto_parse = __commonJS({
       }
       m = /^(\d{1,2}):(\d{2})(?::(\d{2}))?(?:\s*([AP]M))?$/i.exec(str);
       if (m) {
-        let [, h, min, sec, ap] = m;
-        h = Number(h);
+        let [, h2, min2, sec2, ap] = m;
+        h2 = Number(h2);
         if (ap) {
           ap = ap.toLowerCase();
-          if (ap === "pm" && h < 12)
-            h += 12;
-          if (ap === "am" && h === 12)
-            h = 0;
+          if (ap === "pm" && h2 < 12)
+            h2 += 12;
+          if (ap === "am" && h2 === 12)
+            h2 = 0;
         }
-        const date = /* @__PURE__ */ new Date();
-        date.setHours(h, Number(min), Number(sec || 0), 0);
+        var date = /* @__PURE__ */ new Date();
+        date.setHours(h2, Number(min2), Number(sec2 || 0), 0);
         return date;
       }
       return null;
@@ -496,7 +538,7 @@ var require_auto_parse = __commonJS({
             return returnIfAllowed(fn, options, originalValue);
         }
         if (options.parseDates) {
-          const dt = parseDateTimeString(trimmed);
+          const dt = parseDateTimeString(trimmed, options);
           if (dt)
             return returnIfAllowed(dt, options, originalValue);
         }

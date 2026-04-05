@@ -67,10 +67,15 @@ autoParse.setErrorHandler = function (fn) {
  *
  */
 const _stripCache = new Map()
+const STRIP_CACHE_LIMIT = 100
 const QUOTE_RE = /['"]/g
 function getStripRegex (chars) {
   let re = _stripCache.get(chars)
   if (!re) {
+    if (_stripCache.size >= STRIP_CACHE_LIMIT) {
+      var firstKey = _stripCache.keys().next().value
+      _stripCache.delete(firstKey)
+    }
     const escaped = chars.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
     re = new RegExp('^[' + escaped + ']+')
     _stripCache.set(chars, re)
@@ -128,15 +133,28 @@ function checkBoolean (value, options) {
  *
  */
 function parseObject (value, options) {
+  var seen = options && options._seen
+  if (!seen) {
+    seen = new WeakSet()
+    options = Object.assign({}, options, { _seen: seen })
+  }
+  if (seen.has(value)) return value
+  seen.add(value)
   if (Array.isArray(value)) {
-    return value.map(function (n, key) {
+    return value.map(function (n) {
       return autoParse(n, options)
     })
   } else if (typeof value === 'object' || value.constructor === undefined) {
+    var schema = options && options.schema
+    var result = Object.create(Object.getPrototypeOf(value))
     for (const n in value) {
-      value[n] = autoParse(value[n], options)
+      if (schema && schema[n]) {
+        result[n] = parseType(value[n], schema[n], options)
+      } else {
+        result[n] = autoParse(value[n], options)
+      }
     }
-    return value
+    return result
   }
   return {}
 }
@@ -235,16 +253,22 @@ function parseMapSetString (str, options) {
   return null
 }
 
-function parseDateTimeString (str) {
-  const iso = /^\d{4}-\d{2}-\d{2}(?:[ T]\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?(?:Z|[+-]\d{2}:?\d{2})?)?$/
+function parseDateTimeString (str, options) {
+  var fmt = options && options.dateFormat
+  var iso = /^\d{4}-\d{2}-\d{2}(?:[ T]\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?(?:Z|[+-]\d{2}:?\d{2})?)?$/
   if (iso.test(str)) {
-    const d = new Date(str)
+    var d = new Date(str)
     if (!Number.isNaN(d.getTime())) return d
   }
-  let m = /^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\s+(\d{1,2}):(\d{2})(?::(\d{2}))?(?:\s*([AP]M))?)?$/i.exec(str)
+  var slashRe = /^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\s+(\d{1,2}):(\d{2})(?::(\d{2}))?(?:\s*([AP]M))?)?$/i
+  var m = fmt !== 'iso' ? slashRe.exec(str) : null
   if (m) {
-    let [, month, day, year, h, min, sec, ap] = m
-    const date = new Date(Number(year), Number(month) - 1, Number(day))
+    let first = Number(m[1])
+    let second = Number(m[2])
+    let month, day
+    if (fmt === 'eu') { day = first; month = second } else { month = first; day = second }
+    let [, , , year, h, min, sec, ap] = m
+    var date = new Date(Number(year), month - 1, day)
     if (h !== undefined) {
       h = Number(h)
       if (ap) {
@@ -256,10 +280,15 @@ function parseDateTimeString (str) {
     }
     return date
   }
-  m = /^(\d{1,2})-(\d{1,2})-(\d{4})(?:\s+(\d{1,2}):(\d{2})(?::(\d{2}))?)?$/.exec(str)
+  var dashRe = /^(\d{1,2})-(\d{1,2})-(\d{4})(?:\s+(\d{1,2}):(\d{2})(?::(\d{2}))?)?$/
+  m = fmt !== 'iso' ? dashRe.exec(str) : null
   if (m) {
-    const [, day, month, year, h, min, sec] = m
-    const date = new Date(Number(year), Number(month) - 1, Number(day))
+    let first = Number(m[1])
+    let second = Number(m[2])
+    let month, day
+    if (fmt === 'us') { month = first; day = second } else { day = first; month = second }
+    var [,,, year, h, min, sec] = m
+    var date = new Date(Number(year), month - 1, day) // eslint-disable-line no-redeclare
     if (h !== undefined) {
       date.setHours(Number(h), Number(min), Number(sec || 0), 0)
     }
@@ -274,7 +303,7 @@ function parseDateTimeString (str) {
       if (ap === 'pm' && h < 12) h += 12
       if (ap === 'am' && h === 12) h = 0
     }
-    const date = new Date()
+    var date = new Date() // eslint-disable-line no-redeclare
     date.setHours(h, Number(min), Number(sec || 0), 0)
     return date
   }
@@ -564,7 +593,7 @@ function autoParse (value, typeOrOptions) {
       if (fn) return returnIfAllowed(fn, options, originalValue)
     }
     if (options.parseDates) {
-      const dt = parseDateTimeString(trimmed)
+      const dt = parseDateTimeString(trimmed, options)
       if (dt) return returnIfAllowed(dt, options, originalValue)
     }
     if (options.parseUrls) {

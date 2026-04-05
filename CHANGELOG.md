@@ -1,5 +1,26 @@
 # Changelog
 
+## 2.5.0
+
+- **Immutable parsing** -- objects and arrays are no longer mutated in place;
+  `autoParse` now returns new copies.
+- **Circular reference safety** -- self-referencing objects are detected and
+  returned as-is instead of causing infinite recursion.
+- **Schema-based parsing** -- new `schema` option to declare expected types per
+  key, combining parsing and validation in one pass.
+- **`dateFormat` option** -- control how ambiguous slash/dash dates are
+  interpreted (`'us'`, `'eu'`, or `'iso'`).
+- **Regex cache cap** -- internal strip-character cache is now capped at 100
+  entries to prevent unbounded memory growth.
+- **Stronger TypeScript definitions** -- typed overloads for common type
+  conversions.
+- **ESM fix** -- `setErrorHandler` is now properly re-exported from the ESM
+  entry point.
+- **Security documentation** -- new Security Considerations section in README
+  with guidance on `parseExpressions`, `parseFunctionStrings`, and `expandEnv`.
+- **CI badge** -- README now links to GitHub Actions instead of Travis CI.
+- Updated `.npmignore` to exclude test and CI files from published package.
+
 ## 2.0.0 (2025-06-05)
 
 - Modern build powered by esbuild

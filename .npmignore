@@ -1,3 +1,7 @@
 .travis.yml
+.github
+.claude
+CLAUDE.md
 ex
 test
+coverage
